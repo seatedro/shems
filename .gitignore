@@ -1,0 +1,10 @@
+# Ignore compiled bun files
+
+# Ignore build output
+/build
+
+# Ignore dependencies
+/node_modules
+
+.env
+**/.DS_Store
