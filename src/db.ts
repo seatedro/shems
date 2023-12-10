@@ -1,9 +1,10 @@
 import postgres from "postgres";
+import { env } from "./env";
 
 export const sql = postgres({
-  host: process.env.HOST,
-  port: process.env.PORT,
-  database: process.env.DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
+  host: env.DB_HOST,
+  port: env.DB_PORT,
+  database: env.DATABASE,
+  user: env.POSTGRES_USER,
+  password: env.POSTGRES_PASSWORD,
 });

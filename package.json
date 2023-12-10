@@ -4,9 +4,11 @@
   },
   "dependencies": {
     "@lucia-auth/adapter-postgresql": "^2.0.2",
+    "@t3-oss/env-core": "^0.7.1",
     "hono": "^3.10.2",
     "lucia": "^2.7.4",
-    "postgres": "^3.4.3"
+    "postgres": "^3.4.3",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "bun-types": "^1.0.7"
