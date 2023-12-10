@@ -4,6 +4,7 @@
   },
   "dependencies": {
     "@lucia-auth/adapter-postgresql": "^2.0.2",
+    "@lucia-auth/oauth": "^3.5.0",
     "@t3-oss/env-core": "^0.7.1",
     "hono": "^3.10.2",
     "lucia": "^2.7.4",

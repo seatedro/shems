@@ -1,12 +1,15 @@
 import { Hono } from "hono";
-import { auth } from "./lucia";
+import { getCookie, setCookie } from "hono/cookie";
+import { auth, githubAuth } from "./lucia";
+import { env } from "./env";
+import { OAuthRequestError } from "@lucia-auth/oauth";
 
 const app = new Hono();
 
 app.get("/", (c) =>
   c.json({
     message: "Hello World!",
-  }),
+  })
 );
 
 app.post("/signup", async (c) => {
@@ -47,7 +50,7 @@ app.post("/signup", async (c) => {
       {
         message: "Signed up Successfully",
       },
-      201,
+      201
     );
   } catch (e) {
     console.error(e);
@@ -55,7 +58,7 @@ app.post("/signup", async (c) => {
       {
         message: "Username already taken",
       },
-      400,
+      400
     );
   }
 });
@@ -93,6 +96,65 @@ app.post("/login", async (c) => {
   }
 });
 
+app.get("/login/github", async (c) => {
+  const [url, state] = await githubAuth.getAuthorizationUrl();
+  setCookie(c, "github_oauth_state", state, {
+    httpOnly: true,
+    secure: env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 1000,
+  });
+
+  return c.redirect(url.toString());
+});
+
+app.get("/login/github/callback", async (c) => {
+  const storedState = getCookie(c, "github_oauth_state");
+  const state = c.req.query().state;
+  const code = c.req.query().code;
+
+  if (
+    !storedState ||
+    !state ||
+    storedState !== state ||
+    typeof code !== "string"
+  ) {
+    return c.json({ message: "Invalid state" }, 400);
+  }
+
+  try {
+    const { getExistingUser, githubUser, createUser } =
+      await githubAuth.validateCallback(code);
+
+    const getUser = async () => {
+      const existingUser = await getExistingUser();
+      if (existingUser) return existingUser;
+      const user = await createUser({
+        attributes: {
+          username: githubUser.login,
+        },
+      });
+      return user;
+    };
+
+    const user = await getUser();
+    const session = await auth.createSession({
+      userId: user.userId,
+      attributes: {},
+    });
+
+    const authRequest = auth.handleRequest(c);
+    authRequest.setSession(session);
+
+    return c.redirect("/");
+  } catch (e) {
+    if (e instanceof OAuthRequestError) {
+      return c.json({ message: e.message }, 400);
+    }
+    return c.json({ message: "Internal Server Error" }, 500);
+  }
+});
+
 app.post("/logout", async (c) => {
   const authRequest = auth.handleRequest(c);
   const session = await authRequest.validate(); // or `authRequest.validateBearerToken()`
@@ -110,13 +172,13 @@ app.post("/logout", async (c) => {
 
 app.get("/user", async (context) => {
   console.log("context", context);
-	const authRequest = auth.handleRequest(context);
-	const session = await authRequest.validate(); // or `authRequest.validateBearerToken()`
-	if (session) {
-		const user = session.user;
-		const username = user.username;
+  const authRequest = auth.handleRequest(context);
+  const session = await authRequest.validate(); // or `authRequest.validateBearerToken()`
+  if (session) {
+    const user = session.user;
+    const username = user.username;
     return context.json({ username });
-	}
+  }
   return context.json({ message: "Unauthorized" }, 401);
 });
 
