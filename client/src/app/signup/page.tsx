@@ -2,9 +2,9 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
-import { login } from "@/lib/actions";
+import { register } from "@/lib/actions";
 
-export default function Login() {
+export default function Register() {
   const { pending } = useFormStatus();
 
   return (
@@ -35,7 +35,7 @@ export default function Login() {
           <p className="text-gray-400 px-3">or</p>
           <hr className="w-full bg-gray-700" />
         </div>
-        <form className="space-y-6" action={login}>
+        <form className="space-y-6" action={register}>
           <div className="flex flex-col">
             <input
               className="w-full bg-gray-700 text-white py-3 px-4 rounded"
@@ -65,14 +65,14 @@ export default function Login() {
             type="submit"
             aria-disabled={pending}
           >
-            Sign In
+            Sign Up
           </Button>
         </form>
         <p className="text-gray-400 text-center mt-6">
-          Don't have an account?
-          <Link className="text-gray-400 hover:text-gray-300" href="/signup">
+          Have an account?
+          <Link className="text-gray-400 hover:text-gray-300" href="/login">
             {" "}
-            <u>Sign Up Now</u>
+            <u>Sign In Now</u>
           </Link>
         </p>
       </div>
