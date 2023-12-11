@@ -3,8 +3,13 @@ import { getCookie, setCookie } from "hono/cookie";
 import { auth, githubAuth } from "./lucia";
 import { env } from "./env";
 import { OAuthRequestError } from "@lucia-auth/oauth";
+import { cors } from "hono/cors";
+import prexit from "prexit";
+import { sql } from "./db";
 
 const app = new Hono();
+
+app.use("/*", cors());
 
 app.get("/", (c) =>
   c.json({
@@ -180,6 +185,15 @@ app.get("/user", async (context) => {
     return context.json({ username });
   }
   return context.json({ message: "Unauthorized" }, 401);
+});
+
+prexit(async () => {
+  if (env.NODE_ENV === "dev") {
+    await sql`DELETE FROM user_session;`;
+    await sql`DELETE FROM user_key;`;
+    await sql`DELETE FROM auth_user;`;
+  }
+  await sql.end();
 });
 
 export default app;
