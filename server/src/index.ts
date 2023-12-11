@@ -187,6 +187,15 @@ app.get("/user", async (context) => {
   return context.json({ message: "Unauthorized" }, 401);
 });
 
+app.get("/validate-session", async (c) => {
+  const authRequest = auth.handleRequest(c);
+  const session = await authRequest.validate(); // or `authRequest.validateBearerToken()`
+  if (session) {
+    return c.json({ message: "Valid session", isValid: true });
+  }
+  return c.json({ message: "Invalid session", isValid: false }, 401);
+});
+
 prexit(async () => {
   if (env.NODE_ENV === "dev") {
     await sql`DELETE FROM user_session;`;
