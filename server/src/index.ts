@@ -6,6 +6,8 @@ import { OAuthRequestError } from "@lucia-auth/oauth";
 import { cors } from "hono/cors";
 import prexit from "prexit";
 import { sql } from "./db";
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
 
 const app = new Hono();
 
@@ -18,23 +20,25 @@ app.get("/", (c) =>
 );
 
 app.post("/signup", async (c) => {
-  const { username, password } = await c.req.json();
-  if (
-    typeof username !== "string" ||
-    username.length < 3 ||
-    username.length > 31
-  ) {
-    console.error(c.req);
-    return c.json({ message: "Invalid username" }, 400);
-  }
-  if (
-    typeof password !== "string" ||
-    password.length < 5 ||
-    password.length > 255
-  ) {
-    return c.json({ message: "Invalid password" }, 400);
-  }
+  const body = await c.req.json();
+  const schema = z.object({
+    username: z.string().min(3).max(31),
+    password: z.string().min(5).max(255),
+    name: z.string().min(3).max(255),
+    billingAddress: z.string().min(3).max(255),
+  });
+  const { username, password, name, billingAddress } = schema.parse(body);
+
   try {
+    const customers = await sql`
+        insert into customers
+          (name, billingaddress)
+        values
+          (${name}, ${billingAddress})
+        returning *
+      `;
+    console.log("Inserted a new customer", customers);
+    const customerId = customers[0].customerid;
     const user = await auth.createUser({
       key: {
         providerId: "username",
@@ -43,6 +47,7 @@ app.post("/signup", async (c) => {
       },
       attributes: {
         username,
+        customer_id: customerId,
       },
     });
     const session = await auth.createSession({
@@ -110,6 +115,7 @@ app.get("/login/github", async (c) => {
     maxAge: 60 * 60 * 1000,
   });
 
+  c.res.headers.set("Access-Control-Allow-Origin", "http://localhost:8080");
   return c.redirect(url.toString());
 });
 
@@ -137,6 +143,7 @@ app.get("/login/github/callback", async (c) => {
       const user = await createUser({
         attributes: {
           username: githubUser.login,
+          customer_id: null,
         },
       });
       return user;
@@ -151,13 +158,44 @@ app.get("/login/github/callback", async (c) => {
     const authRequest = auth.handleRequest(c);
     authRequest.setSession(session);
 
-    return c.redirect("/");
+    return c.redirect("http://localhost:8080/complete-profile");
   } catch (e) {
     if (e instanceof OAuthRequestError) {
       return c.json({ message: e.message }, 400);
     }
     return c.json({ message: "Internal Server Error" }, 500);
   }
+});
+
+app.put("/complete-profile", async (c) => {
+  const authRequest = auth.handleRequest(c);
+  const session = await authRequest.validate();
+  if (!session) {
+    return c.json({ message: "Unauthorized" }, 401);
+  }
+
+  const body = await c.req.json();
+  const schema = z.object({
+    name: z.string().min(3).max(255),
+    billingAddress: z.string().min(3).max(255),
+  });
+  const { name, billingAddress } = schema.parse(body);
+
+  const { userId } = session.user;
+  // Insert into customers table
+  const customers = await sql`
+    insert into customers
+      (name, billingaddress)
+    values
+      (${name}, ${billingAddress})
+    returning *
+  `;
+  console.log("Inserted a new customer", customers);
+  const customerId = customers[0].customerid;
+  await auth.updateUserAttributes(userId, {
+    username: session.user.username,
+    customer_id: customerId,
+  });
 });
 
 app.post("/logout", async (c) => {
@@ -195,6 +233,64 @@ app.get("/validate-session", async (c) => {
   }
   return c.json({ message: "Invalid session", isValid: false }, 401);
 });
+
+app.get(
+  "/locations/:customerId",
+  zValidator(
+    "param",
+    z.object({
+      customerId: z.string(),
+    })
+  ),
+  async (c) => {
+    const { customerId } = c.req.valid("param");
+    const customerIdInt = z.coerce.number().parse(customerId);
+
+    // Fetching all service locations for a customer
+    const serviceLocations = await sql`
+    SELECT *
+    FROM servicelocations
+    WHERE customerid = ${customerIdInt}
+  `;
+    console.log(
+      `Fetched service locations for: ${customerId}`,
+      serviceLocations
+    );
+    return c.json({
+      customerIdInt,
+      serviceLocations,
+    });
+  }
+);
+
+app.get(
+  "/devices/:locationId",
+  zValidator(
+    "param",
+    z.object({
+      locationId: z.string(),
+    })
+  ),
+  async (c) => {
+    const { locationId } = c.req.valid("param");
+    const customerIdInt = z.coerce.number().parse(locationId);
+
+    // Fetching all service locations for a customer
+    const serviceLocations = await sql`
+    SELECT *
+    FROM servicelocations
+    WHERE customerid = ${customerIdInt}
+  `;
+    console.log(
+      `Fetched service locations for: ${locationId}`,
+      serviceLocations
+    );
+    return c.json({
+      customerIdInt,
+      serviceLocations,
+    });
+  }
+);
 
 prexit(async () => {
   if (env.NODE_ENV === "dev") {
