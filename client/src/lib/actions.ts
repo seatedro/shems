@@ -28,5 +28,7 @@ export async function register(formData: FormData) {
     body: JSON.stringify(registerReq),
   });
 
-  redirect("/login");
+  if (response.status === 201) {
+    redirect("/login");
+  }
 }
