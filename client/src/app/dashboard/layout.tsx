@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { BarChartIcon } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -25,8 +26,8 @@ export default function DashboardLayout({
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-[60px] items-center border-b px-6 border-gray-600">
             <Link className="flex items-center gap-2 font-semibold" href="#">
-              <HomeIcon className="h-6 w-6" />
-              <span>shems</span>
+              <BarChartIcon className="h-6 w-6" />
+              <span>SHEMS</span>
             </Link>
             <Button className="ml-auto h-8 w-8" size="icon" variant="outline">
               <BellIcon className="h-4 w-4" />
@@ -37,16 +38,16 @@ export default function DashboardLayout({
             <nav className="grid items-start px-4 text-sm font-medium">
               <Link
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400",
-                  pathname === "/dashboard" &&
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ",
+                  pathname === "/dashboard/locations" &&
                     "text-gray-900 dark:text-gray-900 bg-gray-200",
-                  pathname !== "/dashboard" &&
+                  pathname !== "/dashboard/locations" &&
                     "dark:hover:text-gray-50 hover:text-gray-900"
                 )}
-                href="/dashboard"
+                href="/dashboard/locations"
               >
-                <LineChartIcon className="h-4 w-4" />
-                Dashboard
+                <MapPinIcon className="h-4 w-4" />
+                Service Locations
               </Link>
               <Link
                 className={cn(
@@ -63,16 +64,16 @@ export default function DashboardLayout({
               </Link>
               <Link
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ",
-                  pathname === "/dashboard/locations" &&
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400",
+                  pathname === "/dashboard" &&
                     "text-gray-900 dark:text-gray-900 bg-gray-200",
-                  pathname !== "/dashboard/locations" &&
+                  pathname !== "/dashboard" &&
                     "dark:hover:text-gray-50 hover:text-gray-900"
                 )}
-                href="/dashboard/locations"
+                href="/dashboard/analytics"
               >
-                <MapPinIcon className="h-4 w-4" />
-                Service Locations
+                <LineChartIcon className="h-4 w-4" />
+                Analytics
               </Link>
             </nav>
           </div>
@@ -86,7 +87,7 @@ export default function DashboardLayout({
           </Link>
           <div className="w-full flex-1">
             <h1 className="font-semibold text-lg md:text-xl">
-              Energy Consumption
+              Smart Home Energy Management System
             </h1>
           </div>
           <DropdownMenu>

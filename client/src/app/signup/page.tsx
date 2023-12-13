@@ -1,11 +1,24 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { register } from "@/lib/actions";
+import { useEffect, useState } from "react";
+import { userDataType } from "@/interfaces/interface";
+import { addUserInitValues } from "@/constants/static_constants";
 
 export default function Register() {
   const { pending } = useFormStatus();
+
+  const [userData, setUserData] = useState<userDataType>(addUserInitValues);
+
+  const handleRegister = () => {
+    console.log(userData);
+    // Make POST call to save user to records
+    // Route to Dashboard if successful
+    redirect("/dashboard/locations");
+  };
 
   return (
     <div
@@ -13,17 +26,19 @@ export default function Register() {
       className="min-h-screen flex flex-col items-center justify-center bg-gray-900 p-6"
     >
       <nav className="absolute top-0 p-5 w-full flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">shems</h1>
+        <h1 className="text-2xl font-bold text-white">SHEMS</h1>
         <div className="flex items-center">
-          <p className="text-sm text-gray-400 mr-2">Dark mode</p>
+          <p className="text-sm text-gray-400 mr-2">Dark Mode</p>
           <div className="w-12 h-6 flex items-center bg-gray-700 rounded-full p-1">
             <div className="bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out" />
           </div>
         </div>
       </nav>
       <div className="w-full max-w-md">
-        <h2 className="text-4xl font-bold text-white mb-2">Welcome back</h2>
-        <p className="text-gray-400 mb-8">Sign in to your account</p>
+        <h2 className="text-4xl font-bold text-white mb-2">Welcome to SHEMS</h2>
+        <p className="text-gray-400 mb-8">
+          Sign Up to the Smart Home Energy Management Systems
+        </p>
         <div className="space-y-4">
           <Link href="http://localhost:3000/login/github" passHref={true}>
             <Button className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 px-4 rounded">
@@ -41,10 +56,46 @@ export default function Register() {
           <div className="flex flex-col">
             <input
               className="w-full bg-gray-700 text-white py-3 px-4 rounded"
+              id="Name"
+              name="Name"
+              placeholder="Your Full Name"
+              type="text"
+              onChange={(event) => {
+                setUserData({
+                  ...userData,
+                  name: event.target.value,
+                });
+              }}
+            />
+          </div>
+          <div className="flex flex-col">
+            <input
+              className="w-full bg-gray-700 text-white py-3 px-4 rounded"
+              id="billingAddress"
+              name="Billing Address"
+              placeholder="Your Billing Address"
+              type="text"
+              onChange={(event) => {
+                setUserData({
+                  ...userData,
+                  billingaddress: event.target.value,
+                });
+              }}
+            />
+          </div>
+          <div className="flex flex-col">
+            <input
+              className="w-full bg-gray-700 text-white py-3 px-4 rounded"
               id="username"
               name="username"
               placeholder="Username"
               type="text"
+              onChange={(event) => {
+                setUserData({
+                  ...userData,
+                  username: event.target.value,
+                });
+              }}
             />
           </div>
           <div className="flex flex-col">
@@ -72,18 +123,19 @@ export default function Register() {
               name="password"
               placeholder="Password"
               type="password"
+              onChange={(event) => {
+                setUserData({
+                  ...userData,
+                  password: event.target.value,
+                });
+              }}
             />
-            <Link
-              className="text-sm text-gray-400 hover:text-gray-300 mt-2"
-              href="#"
-            >
-              Forgot Password?
-            </Link>
           </div>
           <Button
             className="w-full bg-black py-3 px-4 rounded text-white"
             type="submit"
             aria-disabled={pending}
+            onClick={handleRegister}
           >
             Sign Up
           </Button>

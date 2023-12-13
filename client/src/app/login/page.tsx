@@ -13,9 +13,9 @@ export default function Login() {
       className="min-h-screen flex flex-col items-center justify-center bg-gray-900 p-6"
     >
       <nav className="absolute top-0 p-5 w-full flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">shems</h1>
+        <h1 className="text-2xl font-bold text-white">SHEMS</h1>
         <div className="flex items-center">
-          <p className="text-sm text-gray-400 mr-2">Dark mode</p>
+          <p className="text-sm text-gray-400 mr-2">Dark Mode</p>
           <div className="w-12 h-6 flex items-center bg-gray-700 rounded-full p-1">
             <div className="bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out" />
           </div>
