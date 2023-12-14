@@ -1,24 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { register } from "@/lib/actions";
-import { useEffect, useState } from "react";
-import { userDataType } from "@/interfaces/interface";
-import { addUserInitValues } from "@/constants/static_constants";
 
 export default function Register() {
   const { pending } = useFormStatus();
-
-  const [userData, setUserData] = useState<userDataType>(addUserInitValues);
-
-  const handleRegister = () => {
-    console.log(userData);
-    // Make POST call to save user to records
-    // Route to Dashboard if successful
-    redirect("/dashboard/locations");
-  };
 
   return (
     <div
@@ -56,46 +43,10 @@ export default function Register() {
           <div className="flex flex-col">
             <input
               className="w-full bg-gray-700 text-white py-3 px-4 rounded"
-              id="Name"
-              name="Name"
-              placeholder="Your Full Name"
-              type="text"
-              onChange={(event) => {
-                setUserData({
-                  ...userData,
-                  name: event.target.value,
-                });
-              }}
-            />
-          </div>
-          <div className="flex flex-col">
-            <input
-              className="w-full bg-gray-700 text-white py-3 px-4 rounded"
-              id="billingAddress"
-              name="Billing Address"
-              placeholder="Your Billing Address"
-              type="text"
-              onChange={(event) => {
-                setUserData({
-                  ...userData,
-                  billingaddress: event.target.value,
-                });
-              }}
-            />
-          </div>
-          <div className="flex flex-col">
-            <input
-              className="w-full bg-gray-700 text-white py-3 px-4 rounded"
               id="username"
               name="username"
               placeholder="Username"
               type="text"
-              onChange={(event) => {
-                setUserData({
-                  ...userData,
-                  username: event.target.value,
-                });
-              }}
             />
           </div>
           <div className="flex flex-col">
@@ -123,19 +74,12 @@ export default function Register() {
               name="password"
               placeholder="Password"
               type="password"
-              onChange={(event) => {
-                setUserData({
-                  ...userData,
-                  password: event.target.value,
-                });
-              }}
             />
           </div>
           <Button
             className="w-full bg-black py-3 px-4 rounded text-white"
             type="submit"
             aria-disabled={pending}
-            onClick={handleRegister}
           >
             Sign Up
           </Button>
