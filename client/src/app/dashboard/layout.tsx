@@ -22,7 +22,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   return (
     <div key="1" className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
-      <div className="hidden border-r border-gray-600 lg:block bg-gray-900 dark:bg-black">
+      <div className="hidden border-r border-gray-600 lg:block bg-gray-800 dark:bg-gray-800">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-[60px] items-center border-b px-6 border-gray-600">
             <Link className="flex items-center gap-2 font-semibold" href="#">
@@ -80,7 +80,7 @@ export default function DashboardLayout({
         </div>
       </div>
       <div className="flex flex-col">
-        <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b border-gray-600 bg-gray-900 px-6 dark:bg-black">
+        <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b border-gray-600 bg-gray-800 px-6 dark:bg-gray-800">
           <Link className="lg:hidden" href="/dashboard">
             <HomeIcon className="h-6 w-6" />
             <span className="sr-only">Home</span>
@@ -93,7 +93,7 @@ export default function DashboardLayout({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                className="rounded-full border border-gray-900 w-8 h-8 dark:bg-black"
+                className="rounded-full border border-gray-900 w-8 h-8 dark:bg-gray-800"
                 size="icon"
                 variant="ghost"
               >

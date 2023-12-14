@@ -216,13 +216,12 @@ app.post("/logout", async (c) => {
 });
 
 app.get("/user", async (context) => {
-  console.log("context", context);
   const authRequest = auth.handleRequest(context);
   const session = await authRequest.validate(); // or `authRequest.validateBearerToken()`
   if (session) {
     const user = session.user;
-    const username = user.username;
-    return context.json({ username });
+    const { customer_id, username } = user;
+    return context.json({ customerId: customer_id, username });
   }
   return context.json({ message: "Unauthorized" }, 401);
 });
@@ -262,6 +261,68 @@ app.get(
       customerIdInt,
       serviceLocations,
     });
+  }
+);
+
+app.post("/location", async (c) => {
+  const authRequest = auth.handleRequest(c);
+  const session = await authRequest.validate();
+  if (!session) {
+    return c.json({ message: "Unauthorized" }, 401);
+  }
+
+  const body = await c.req.json();
+  console.log("body", body);
+  const columns = [
+    "customerid",
+    "locationtype",
+    "address",
+    "unitnumber",
+    "dateacquired",
+    "zipcode",
+    "squarefootage",
+    "numberofbedrooms",
+    "numberofoccupants",
+  ];
+  const serviceLocation = await sql`
+    INSERT INTO servicelocations
+    ${sql(body, columns)}
+  `;
+
+  console.log("Inserted a new service location", serviceLocation);
+  return c.json(
+    {
+      message: "Service location created successfully",
+    },
+    201
+  );
+});
+
+app.delete(
+  "/location/:locationId",
+  zValidator("param", z.object({ locationId: z.string() })),
+  async (c) => {
+    const authRequest = auth.handleRequest(c);
+    const session = await authRequest.validate();
+    if (!session) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const { locationId } = c.req.param();
+    const locationIdInt = z.coerce.number().parse(locationId);
+
+    const serviceLocation = await sql`
+    DELETE FROM servicelocations
+    WHERE locationid = ${locationIdInt}
+  `;
+
+    console.log("Deleted service location", serviceLocation);
+    return c.json(
+      {
+        message: "Service location deleted successfully",
+      },
+      200
+    );
   }
 );
 

@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,7 +10,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { deleteLocation } from "@/lib/actions";
+// import { useState } from "react";
 export default function DeleteLocationDialog({
   children,
   rowId,
@@ -20,7 +21,7 @@ export default function DeleteLocationDialog({
   rowId: number | null;
   onDelete: (id: number) => void;
 }) {
-  const [deleteRowIndex, setDeleteRowIndex] = useState<number | null>(null);
+  // const [deleteRowIndex, setDeleteRowIndex] = useState<number | null>(null);
   // const handleSerLocDelete = (id: number | null) => {
   //   // Make POST call with the Device ID to delete the record
   //   console.log(id);
@@ -36,7 +37,7 @@ export default function DeleteLocationDialog({
   // };
   return (
     <AlertDialog>
-      <AlertDialogTrigger>{children}</AlertDialogTrigger>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
@@ -49,19 +50,18 @@ export default function DeleteLocationDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
-            onClick={() => {
-              setDeleteRowIndex(null);
-            }}
+          // onClick={() => {
+          //   setDeleteRowIndex(null);
+          // }}
           >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            type="button"
+            type="submit"
             className="bg-red-600 dark:bg-red-400"
-            onClick={() => {
-              // handleSerLocDelete(deleteRowIndex);
+            onClick={async () => {
               if (rowId) {
-                onDelete(rowId);
+                await deleteLocation(rowId);
               }
             }}
           >
