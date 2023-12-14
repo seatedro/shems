@@ -196,6 +196,8 @@ app.put("/complete-profile", async (c) => {
     username: session.user.username,
     customer_id: customerId,
   });
+
+  return c.json({ message: "Profile completed successfully" });
 });
 
 app.post("/logout", async (c) => {
