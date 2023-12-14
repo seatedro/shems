@@ -4,19 +4,18 @@ export interface userDataType {
   username: string;
   password: string;
 }
-
-export interface serviceLocationType {
-  LocationID: number | null;
-  CustomerID: number | null;
-  LocationType: string;
-  Address: string;
-  UnitNumber: string;
-  DateAcquired: string;
-  SquareFootage: number;
-  NumberOfBedrooms: number;
-  NumberOfOccupants: number;
-  ZipCode: string;
-}
+export type ServiceLocation = {
+  locationid: number | null;
+  customerid: number | null;
+  locationtype: string;
+  address: string;
+  unitnumber: string;
+  dateacquired: string;
+  squarefootage: number;
+  numberofbedrooms: number;
+  numberofoccupants: number;
+  zipcode: string;
+};
 
 export interface DeviceListType {
   deviceid: number;

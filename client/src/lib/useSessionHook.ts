@@ -10,9 +10,11 @@ export async function useSession() {
       method: "GET",
       credentials: "include",
     });
+    const userData = await fetch(`${process.env.API_URL}/user`);
+    const user = await userData.json();
     const data = await res.json();
     if (res.status == 200 && data.isValid) {
-      return { isTokenValid: true, sessionToken: token };
+      return { isTokenValid: true, sessionToken: token, user };
     }
   } catch (e) {
     console.error(e);
