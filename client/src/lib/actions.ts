@@ -12,8 +12,8 @@ export async function login(formData: FormData) {
     body: JSON.stringify(loginReq),
   });
 
-  // const [name, value] = response.headers.get("set-cookie")!.split("=");
-  // cookies().set(name, value);
+  const [name, value] = response.headers.get("set-cookie")!.split("=");
+  cookies().set(name, value);
   redirect("/dashboard");
 }
 
