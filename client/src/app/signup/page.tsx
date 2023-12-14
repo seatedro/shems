@@ -13,17 +13,19 @@ export default function Register() {
       className="min-h-screen flex flex-col items-center justify-center bg-gray-900 p-6"
     >
       <nav className="absolute top-0 p-5 w-full flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">shems</h1>
+        <h1 className="text-2xl font-bold text-white">SHEMS</h1>
         <div className="flex items-center">
-          <p className="text-sm text-gray-400 mr-2">Dark mode</p>
+          <p className="text-sm text-gray-400 mr-2">Dark Mode</p>
           <div className="w-12 h-6 flex items-center bg-gray-700 rounded-full p-1">
             <div className="bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out" />
           </div>
         </div>
       </nav>
       <div className="w-full max-w-md">
-        <h2 className="text-4xl font-bold text-white mb-2">Welcome back</h2>
-        <p className="text-gray-400 mb-8">Sign in to your account</p>
+        <h2 className="text-4xl font-bold text-white mb-2">Welcome to SHEMS</h2>
+        <p className="text-gray-400 mb-8">
+          Sign Up to the Smart Home Energy Management Systems
+        </p>
         <div className="space-y-4">
           <Link href="http://localhost:3000/login/github" passHref={true}>
             <Button className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 px-4 rounded">
@@ -73,12 +75,6 @@ export default function Register() {
               placeholder="Password"
               type="password"
             />
-            <Link
-              className="text-sm text-gray-400 hover:text-gray-300 mt-2"
-              href="#"
-            >
-              Forgot Password?
-            </Link>
           </div>
           <Button
             className="w-full bg-black py-3 px-4 rounded text-white"
