@@ -8,6 +8,7 @@ import prexit from "prexit";
 import { sql } from "./db";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import devicedata from "./routes/data";
 
 const app = new Hono();
 
@@ -354,6 +355,8 @@ app.get(
     });
   }
 );
+
+app.route("/devicedata", devicedata);
 
 prexit(async () => {
   if (env.NODE_ENV === "dev") {

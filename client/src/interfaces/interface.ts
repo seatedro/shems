@@ -45,3 +45,9 @@ export interface deviceDataType {
   color: string;
   data: lineDataType[];
 }
+
+export type EnergyData = {
+  locationid: number;
+  sum: number;
+  timestamp: string;
+};
