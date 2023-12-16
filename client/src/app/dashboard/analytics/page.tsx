@@ -28,7 +28,6 @@ export default async function Page() {
     })
     .filter((e) => e.locationid === 9);
   const minValue = Math.min(...energyData.map((e) => e.sum));
-  console.log(minValue);
 
   return (
     <>

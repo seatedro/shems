@@ -35,18 +35,12 @@ export default function LocationComponent({
   };
 
   const onDelete = (id: number) => {
-    // Make POST call with the Device ID to delete the record
-    console.log(id);
-
     toast({
       variant: "default",
       title: "Success..!",
       description:
         "The Respective Service Location was deleted from your account.",
     });
-    const newServiceLocations = serviceLocations.filter(
-      (iter) => iter.locationid !== id
-    );
   };
 
   return (

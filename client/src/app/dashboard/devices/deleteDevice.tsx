@@ -9,8 +9,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { deleteLocation } from "@/lib/actions";
-export default function DeleteLocationDialog({
+import { deleteDevice } from "@/lib/actions";
+export default function DeleteDeviceDialog({
   children,
   rowId,
   onDelete,
@@ -25,11 +25,11 @@ export default function DeleteLocationDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Do you really want to Delete this Service Location?
+            Do you really want to delete this Device?
           </AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete the
-            service location data and all the devices associated with it.
+            device!
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -39,7 +39,7 @@ export default function DeleteLocationDialog({
             className="bg-red-600 dark:bg-red-400"
             onClick={async () => {
               if (rowId) {
-                await deleteLocation(rowId);
+                await deleteDevice(rowId);
                 onDelete(rowId);
               }
             }}

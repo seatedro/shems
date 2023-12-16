@@ -1,0 +1,72 @@
+{
+  "Refrigerator": [
+    "Whirlpool Gen +",
+    "Samsung 1210",
+    "LG SmartCool",
+    "GE Profile Series",
+    "Bosch Serie 6"
+  ],
+  "AC System": [
+    "Daikin DXT35",
+    "Carrier Infinity 20",
+    "Trane XV20i",
+    "Samsung WindFree",
+    "LG DualCool"
+  ],
+  "Washer": [
+    "Bosch WAK24168IN",
+    "Samsung FlexWash",
+    "LG TwinWash",
+    "Whirlpool FreshCare",
+    "IFB Senorita Aqua"
+  ],
+  "Dryer": [
+    "LG DLEX8100V",
+    "Samsung DV90",
+    "Bosch WTG86402UC",
+    "Electrolux EFME627UTT",
+    "Whirlpool WED6620HC"
+  ],
+  "Light": [
+    "Philips Hue",
+    "LIFX A60",
+    "Wyze Bulb",
+    "Xiaomi Mi LED",
+    "Sengled Smart LED"
+  ],
+  "Dishwasher": [
+    "Bosch 800 Series",
+    "KitchenAid KDPE234GPS",
+    "Samsung DW80R9950US",
+    "GE GDP645SYNFS",
+    "Whirlpool WDT730PAHZ"
+  ],
+  "Oven": [
+    "GE JB645RKSS",
+    "Samsung NE59J7850WG",
+    "LG LSE4611ST",
+    "Whirlpool WFE505W0JZ",
+    "Bosch HGI8056UC"
+  ],
+  "Microwave": [
+    "Panasonic NN-SN966S",
+    "LG LMV2031ST",
+    "Samsung ME21M706BAG",
+    "Whirlpool WMH53521H",
+    "Bosch HMB50152UC"
+  ],
+  "Vacuum Cleaner": [
+    "Dyson V11",
+    "Roomba 960",
+    "Shark IQ R101AE",
+    "Eufy RoboVac 11s",
+    "Bissell Crosswave"
+  ],
+  "Smart Thermostat": [
+    "Nest Thermostat",
+    "Ecobee SmartThermostat",
+    "Honeywell Home T9",
+    "Emerson Sensi Touch",
+    "Lux Kono"
+  ]
+}

@@ -51,3 +51,10 @@ export type EnergyData = {
   sum: number;
   timestamp: string;
 };
+
+export type Device = {
+  deviceid: number;
+  locationid: number;
+  devicetype: string;
+  modelnumber: string;
+};

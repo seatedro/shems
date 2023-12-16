@@ -9,6 +9,8 @@ import { sql } from "./db";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import devicedata from "./routes/data";
+import models from "./routes/models";
+import devices from "./routes/devices";
 
 const app = new Hono();
 
@@ -21,6 +23,12 @@ app.get("/", (c) =>
 );
 
 app.post("/signup", async (c) => {
+  const authRequest = auth.handleRequest(c);
+  const session = await authRequest.validate();
+  if (!session) {
+    return c.json({ message: "Unauthorized" }, 401);
+  }
+
   const body = await c.req.json();
   const schema = z.object({
     username: z.string().min(3).max(31),
@@ -32,11 +40,11 @@ app.post("/signup", async (c) => {
 
   try {
     const customers = await sql`
-        insert into customers
+        INSERT INTO customers
           (name, billingaddress)
-        values
+        VALUES
           (${name}, ${billingAddress})
-        returning *
+        RETURNING *
       `;
     console.log("Inserted a new customer", customers);
     const customerId = customers[0].customerid;
@@ -185,11 +193,11 @@ app.put("/complete-profile", async (c) => {
   const { userId } = session.user;
   // Insert into customers table
   const customers = await sql`
-    insert into customers
+    INSERT INTO customers
       (name, billingaddress)
-    values
+    VALUES
       (${name}, ${billingAddress})
-    returning *
+    RETURNING *
   `;
   console.log("Inserted a new customer", customers);
   const customerId = customers[0].customerid;
@@ -259,7 +267,7 @@ app.get(
       serviceLocations
     );
     return c.json({
-      customerIdInt,
+      customerId: customerIdInt,
       serviceLocations,
     });
   }
@@ -327,42 +335,15 @@ app.delete(
   }
 );
 
-app.get(
-  "/devices/:locationId",
-  zValidator(
-    "param",
-    z.object({
-      locationId: z.string(),
-    })
-  ),
-  async (c) => {
-    const { locationId } = c.req.valid("param");
-    const customerIdInt = z.coerce.number().parse(locationId);
-
-    // Fetching all service locations for a customer
-    const serviceLocations = await sql`
-    SELECT *
-    FROM servicelocations
-    WHERE customerid = ${customerIdInt}
-  `;
-    console.log(
-      `Fetched service locations for: ${locationId}`,
-      serviceLocations
-    );
-    return c.json({
-      customerIdInt,
-      serviceLocations,
-    });
-  }
-);
-
 app.route("/devicedata", devicedata);
+app.route("/devices", devices);
+app.route("/models", models);
 
 prexit(async () => {
   if (env.NODE_ENV === "dev") {
-    await sql`DELETE FROM user_session;`;
-    await sql`DELETE FROM user_key;`;
-    await sql`DELETE FROM auth_user;`;
+    // await sql`DELETE FROM user_session;`;
+    // await sql`DELETE FROM user_key;`;
+    // await sql`DELETE FROM auth_user;`;
   }
   await sql.end();
 });

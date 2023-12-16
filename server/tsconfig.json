@@ -6,6 +6,7 @@
     "jsxImportSource": "hono/jsx",
     "types": [
       "bun-types"
-    ]
+    ],
+    "resolveJsonModule": true
   }
 }

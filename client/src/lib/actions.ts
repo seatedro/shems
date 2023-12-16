@@ -102,3 +102,38 @@ export async function deleteLocation(rowId: number) {
 
   revalidateTag("getLocations");
 }
+
+export async function addDevice(formData: FormData) {
+  console.log("addDevice", formData);
+  const req = {
+    locationid: formData.get("locationid"),
+    devicetype: formData.get("type"),
+    modelnumber: formData.get("modelnumber"),
+  };
+  const authSessionCookie = getAuthSessionCookie();
+  const response = await fetch(`${process.env.API_URL}/devices`, {
+    method: "POST",
+    body: JSON.stringify(req),
+    headers: {
+      Origin: process.env.API_URL!,
+      Host: "localhost:3000",
+      Cookie: `auth_session=${authSessionCookie?.value}`,
+    },
+  });
+
+  revalidateTag("getDevices");
+}
+
+export async function deleteDevice(deviceId: number) {
+  const authSessionCookie = getAuthSessionCookie();
+  const response = await fetch(`${process.env.API_URL}/devices/${deviceId}`, {
+    method: "DELETE",
+    headers: {
+      Origin: process.env.API_URL!,
+      Host: "localhost:3000",
+      Cookie: `auth_session=${authSessionCookie?.value}`,
+    },
+  });
+
+  revalidateTag("getDevices");
+}
