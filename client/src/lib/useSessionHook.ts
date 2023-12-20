@@ -32,7 +32,7 @@ export async function useUser() {
     credentials: "include",
     headers: {
       Origin: process.env.API_URL!,
-      Host: "localhost:3000",
+      Host: process.env.API_HOST!,
       Cookie: `auth_session=${session.sessionToken?.value}`,
     },
   });

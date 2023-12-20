@@ -118,7 +118,7 @@ app.get("/login/github", async (c) => {
     maxAge: 60 * 60 * 1000,
   });
 
-  c.res.headers.set("Access-Control-Allow-Origin", "http://localhost:8080");
+  c.res.headers.set("Access-Control-Allow-Origin", env.CLIENT_URL);
   return c.redirect(url.toString());
 });
 
@@ -161,7 +161,7 @@ app.get("/login/github/callback", async (c) => {
     const authRequest = auth.handleRequest(c);
     authRequest.setSession(session);
 
-    return c.redirect("http://localhost:8080/complete-profile");
+    return c.redirect(`${env.CLIENT_URL}/complete-profile`);
   } catch (e) {
     if (e instanceof OAuthRequestError) {
       return c.json({ message: e.message }, 400);

@@ -11,6 +11,7 @@ export const env = createEnv({
     NODE_ENV: z.union([z.literal("dev"), z.literal("production")]),
     GITHUB_CLIENT_ID: z.string(),
     GITHUB_CLIENT_SECRET: z.string(),
+    CLIENT_URL: z.string().default("http://localhost:8080"),
   },
   runtimeEnv: process.env,
 });
