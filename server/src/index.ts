@@ -23,12 +23,6 @@ app.get("/", (c) =>
 );
 
 app.post("/signup", async (c) => {
-  const authRequest = auth.handleRequest(c);
-  const session = await authRequest.validate();
-  if (!session) {
-    return c.json({ message: "Unauthorized" }, 401);
-  }
-
   const body = await c.req.json();
   const schema = z.object({
     username: z.string().min(3).max(31),
