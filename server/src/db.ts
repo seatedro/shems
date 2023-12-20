@@ -10,27 +10,6 @@ export const sql = postgres({
 });
 
 (async function () {
-  const createUsers = await sql`
-    CREATE TABLE IF NOT EXISTS auth_user (
-        id TEXT PRIMARY KEY,
-        username TEXT,
-        customer_id INT REFERENCES customers(customerid)
-    )
-  `;
-
-  const createAuthKey = await sql`CREATE TABLE IF NOT EXISTS user_key (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL REFERENCES auth_user(id),
-    hashed_password TEXT
-  )`;
-
-  const createUserSession = await sql`CREATE TABLE IF NOT EXISTS user_session (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL REFERENCES auth_user(id),
-    active_expires BIGINT NOT NULL,
-    idle_expires BIGINT NOT NULL
-  );`;
-
   const createCustomers = await sql`CREATE TABLE IF NOT EXISTS Customers (
     CustomerID SERIAL PRIMARY KEY,
     Name VARCHAR(255),
@@ -72,4 +51,25 @@ export const sql = postgres({
     Time TIMESTAMP,
     PricePerKWh DECIMAL
   )`;
+
+  const createUsers = await sql`
+    CREATE TABLE IF NOT EXISTS auth_user (
+        id TEXT PRIMARY KEY,
+        username TEXT,
+        customer_id INT REFERENCES customers(customerid)
+    )
+  `;
+
+  const createAuthKey = await sql`CREATE TABLE IF NOT EXISTS user_key (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES auth_user(id),
+    hashed_password TEXT
+  )`;
+
+  const createUserSession = await sql`CREATE TABLE IF NOT EXISTS user_session (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES auth_user(id),
+    active_expires BIGINT NOT NULL,
+    idle_expires BIGINT NOT NULL
+  );`;
 })();

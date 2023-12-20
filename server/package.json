@@ -15,7 +15,6 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@flydotio/dockerfile": "latest",
     "bun-types": "^1.0.7"
   }
 }
