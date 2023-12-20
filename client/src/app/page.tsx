@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { CardHeader, CardContent, Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
-export function Landing() {
+export default function Landing() {
   return (
     <>
       <header className="px-4 lg:px-6 h-14 flex items-center bg-slate-900">
@@ -138,5 +136,3 @@ function HomeIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-
-export default Landing;
