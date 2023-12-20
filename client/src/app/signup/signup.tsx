@@ -27,7 +27,10 @@ export default function Signup() {
           Sign Up to the Smart Home Energy Management Systems
         </p>
         <div className="space-y-4">
-          <Link href={`${process.env.API_URL}/login/github`} passHref={true}>
+          <Link
+            href={`${process.env.NEXT_PUBLIC_API_URL}/login/github`}
+            passHref={true}
+          >
             <Button className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 px-4 rounded">
               <GithubIcon className="text-white" />
               Continue with GitHub

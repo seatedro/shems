@@ -5,7 +5,7 @@ import { EnergyData } from "@/interfaces/interface";
 
 export default async function Page() {
   const session = await useSession();
-  if (!session) {
+  if (!session || !session.isTokenValid) {
     redirect("/login");
   }
   const user = await useUser();

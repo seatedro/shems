@@ -25,7 +25,10 @@ export default function Login() {
         <h2 className="text-4xl font-bold text-white mb-2">Welcome back</h2>
         <p className="text-gray-400 mb-8">Sign in to your account</p>
         <div className="space-y-4">
-          <Link href={`${process.env.API_URL}/login/github`} passHref={true}>
+          <Link
+            href={`${process.env.NEXT_PUBLIC_API_URL}/login/github`}
+            passHref={true}
+          >
             <Button className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 px-4 rounded">
               <GithubIcon className="text-white" />
               Continue with GitHub

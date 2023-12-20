@@ -37,6 +37,14 @@ import {
   Line,
   YAxis,
 } from "recharts";
+import {
+  Flex,
+  LineChart,
+  Metric,
+  Text,
+  Card as TremorCard,
+  LineChart as TremorLineChart,
+} from "@tremor/react";
 
 export default function Analytics({
   energyData,
@@ -118,17 +126,31 @@ export default function Analytics({
             <CardTitle>Energy Used (24hrs)</CardTitle>
           </CardHeader>
           <CardContent>
+            <TremorLineChart
+              className="h-40"
+              data={energyData}
+              index="timestamp"
+              color="emerald"
+              categories={["consumption"]}
+              showLegend={false}
+              showXAxis={false}
+              showYAxis={false}
+              yAxisWidth={10}
+              showAnimation={true}
+              autoMinValue={true}
+              curveType="monotone"
+            />
+            {/* 
             <ReLineChart
               width={400}
               height={100}
               data={energyData}
               margin={{ top: 25 }}
             >
-              {/* <XAxis dataKey="timestamp" /> */}
               <YAxis domain={[minValue - 0.5, "auto"]} hide={true} />
               <Tooltip />
               <Line type="monotone" dataKey="consumption" stroke="red" />
-            </ReLineChart>
+            </ReLineChart> */}
           </CardContent>
         </Card>
       </div>

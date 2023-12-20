@@ -9,6 +9,7 @@ export async function login(formData: FormData) {
   const loginReq = Object.fromEntries(formData);
 
   // Use fetch to make a post request to the server
+  console.log(process.env.API_URL);
   const response = await fetch(`${process.env.API_URL}/login`, {
     method: "POST",
     body: JSON.stringify(loginReq),
@@ -16,7 +17,25 @@ export async function login(formData: FormData) {
 
   const [name, value] = response.headers.get("set-cookie")!.split("=");
   cookies().set(name, value);
+  console.log("Response received from server", await response.json());
   redirect("/dashboard");
+}
+
+export async function logout() {
+  const authSessionCookie = getAuthSessionCookie();
+  const response = await fetch(`${process.env.API_URL}/logout`, {
+    method: "POST",
+    headers: {
+      Origin: process.env.API_URL!,
+      Host: process.env.API_HOST!,
+      Cookie: `auth_session=${authSessionCookie?.value}`,
+    },
+  });
+
+  if (response.status === 200) {
+    cookies().delete("auth_session");
+    redirect("/");
+  }
 }
 
 export async function register(formData: FormData) {

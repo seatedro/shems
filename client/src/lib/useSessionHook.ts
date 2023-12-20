@@ -3,6 +3,9 @@ import { cookies } from "next/headers";
 // Custom hook to check session token validity
 export async function useSession() {
   const authSessionCookie = getAuthSessionCookie();
+  if (!authSessionCookie) {
+    return { isTokenValid: false, sessionToken: null };
+  }
   try {
     const res = await fetch(`${process.env.API_URL}/validate-session`, {
       method: "GET",

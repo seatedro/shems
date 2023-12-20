@@ -77,6 +77,7 @@ app.post("/signup", async (c) => {
 });
 
 app.post("/login", async (c) => {
+  console.log("~~~~~~~~~LOGIN");
   const { username, password } = await c.req.json();
   if (
     typeof username !== "string" ||
@@ -160,6 +161,10 @@ app.get("/login/github/callback", async (c) => {
 
     const authRequest = auth.handleRequest(c);
     authRequest.setSession(session);
+
+    if (user.customer_id) {
+      return c.redirect(`${env.CLIENT_URL}/dashboard`);
+    }
 
     return c.redirect(`${env.CLIENT_URL}/complete-profile`);
   } catch (e) {
