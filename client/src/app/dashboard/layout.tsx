@@ -70,7 +70,7 @@ export default function DashboardLayout({
                   pathname !== "/dashboard" &&
                     "dark:hover:text-gray-50 hover:text-gray-900"
                 )}
-                href="/dashboard/analytics"
+                href="/dashboard"
               >
                 <LineChartIcon className="h-4 w-4" />
                 Analytics

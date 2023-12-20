@@ -9,7 +9,7 @@ export async function login(formData: FormData) {
   const loginReq = Object.fromEntries(formData);
 
   // Use fetch to make a post request to the server
-  const response = await fetch("http://localhost:3000/login", {
+  const response = await fetch(`${process.env.API_URL}/login`, {
     method: "POST",
     body: JSON.stringify(loginReq),
   });
@@ -24,7 +24,7 @@ export async function register(formData: FormData) {
   const registerReq = Object.fromEntries(formData);
 
   // Use fetch to make a post request to the server
-  const response = await fetch("http://localhost:3000/signup", {
+  const response = await fetch(`${process.env.API_URL}/signup`, {
     method: "POST",
     body: JSON.stringify(registerReq),
     credentials: "include",
@@ -42,12 +42,12 @@ export async function completeProfile(formData: FormData) {
 
   // Use fetch to make a post request to the server
   const authSessionCookie = getAuthSessionCookie();
-  const response = await fetch("http://localhost:3000/complete-profile", {
+  const response = await fetch(`${process.env.API_URL}/complete-profile`, {
     method: "PUT",
     body: JSON.stringify(profileReq),
     headers: {
-      Origin: "http://localhost:3000",
-      Host: "localhost:3000",
+      Origin: process.env.API_URL!,
+      Host: process.env.API_HOST!,
       Cookie: `auth_session=${authSessionCookie?.value}`,
     },
     credentials: "include",
@@ -81,7 +81,7 @@ export async function addLocation(formData: FormData) {
     body: JSON.stringify(req),
     headers: {
       Origin: process.env.API_URL!,
-      Host: "localhost:3000",
+      Host: process.env.API_HOST!,
       Cookie: `auth_session=${authSessionCookie?.value}`,
     },
   });
@@ -95,7 +95,7 @@ export async function deleteLocation(rowId: number) {
     method: "DELETE",
     headers: {
       Origin: process.env.API_URL!,
-      Host: "localhost:3000",
+      Host: process.env.API_HOST!,
       Cookie: `auth_session=${authSessionCookie?.value}`,
     },
   });
@@ -116,7 +116,7 @@ export async function addDevice(formData: FormData) {
     body: JSON.stringify(req),
     headers: {
       Origin: process.env.API_URL!,
-      Host: "localhost:3000",
+      Host: process.env.API_HOST!,
       Cookie: `auth_session=${authSessionCookie?.value}`,
     },
   });
@@ -130,7 +130,7 @@ export async function deleteDevice(deviceId: number) {
     method: "DELETE",
     headers: {
       Origin: process.env.API_URL!,
-      Host: "localhost:3000",
+      Host: process.env.API_HOST!,
       Cookie: `auth_session=${authSessionCookie?.value}`,
     },
   });

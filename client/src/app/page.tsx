@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { CardHeader, CardContent, Card } from "@/components/ui/card";
+import { useSession } from "@/lib/useSessionHook";
+import { redirect } from "next/navigation";
 
-export default function Landing() {
+export default async function Landing() {
+  const session = await useSession();
+  if (session && session.isTokenValid) {
+    redirect("/dashboard");
+  }
   return (
     <>
       <header className="px-4 lg:px-6 h-14 flex items-center bg-slate-900">

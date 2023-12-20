@@ -9,7 +9,7 @@ export async function useSession() {
       credentials: "include",
       headers: {
         Origin: process.env.API_URL!,
-        Host: "localhost:3000",
+        Host: process.env.API_HOST!,
         Cookie: `auth_session=${authSessionCookie?.value}`,
       },
     });
@@ -26,14 +26,6 @@ export async function useSession() {
 }
 
 export async function useUser() {
-  if (typeof window !== "undefined") {
-    let userFromLocalStorage = localStorage.getItem("user");
-    if (userFromLocalStorage) {
-      const user: { username: string; customerId: number } =
-        JSON.parse(userFromLocalStorage);
-      return user;
-    }
-  }
   const session = await useSession();
   const userData = await fetch(`${process.env.API_URL}/user`, {
     method: "GET",
