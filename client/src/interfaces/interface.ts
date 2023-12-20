@@ -52,6 +52,13 @@ export type EnergyData = {
   timestamp: string;
 };
 
+export type EnergyComparison = {
+  locationid: number;
+  address: string;
+  energyused: number;
+  percentage: number;
+};
+
 export type Device = {
   deviceid: number;
   locationid: number;

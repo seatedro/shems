@@ -1,7 +1,8 @@
 import { useSession, useUser } from "@/lib/useSessionHook";
 import { redirect } from "next/navigation";
 import Analytics from "./analytics";
-import { EnergyData } from "@/interfaces/interface";
+import { EnergyComparison, EnergyData } from "@/interfaces/interface";
+import { getLocations } from "@/lib/api";
 
 export default async function Page() {
   const session = await useSession();
@@ -17,23 +18,27 @@ export default async function Page() {
       },
     }
   );
-  const data: { energyConsumptions: EnergyData[] } = await req.json();
-  const energyData = data?.energyConsumptions
-    ?.map((e) => {
-      return {
-        ...e,
-        consumption: e.sum,
-        date: new Date(e.timestamp),
-      };
-    })
-    .filter((e) => e.locationid === 9);
-  const minValue = Math.min(...energyData.map((e) => e.sum));
+  const energyData: { energyConsumptions: EnergyData[] } = await req.json();
+
+  const locations = await getLocations();
+
+  const comparisonReq = await fetch(
+    `${process.env.API_URL}/devicedata/comparison?customerId=${user?.customerId}`,
+    {
+      next: {
+        tags: [`getEnergyComparison-${user.customerId}`],
+      },
+    }
+  );
+  const comparisonData: { energyComparisons: EnergyComparison[] } =
+    await comparisonReq.json();
 
   return (
     <>
       <Analytics
-        energyData={energyData ? energyData : []}
-        minValue={minValue}
+        energyData={energyData ? energyData.energyConsumptions : []}
+        locations={locations}
+        comparisonData={comparisonData ? comparisonData.energyComparisons : []}
       />
     </>
   );

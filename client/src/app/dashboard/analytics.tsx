@@ -15,6 +15,7 @@ import {
   deviceDataType,
   ServiceLocation,
   EnergyData,
+  EnergyComparison,
 } from "@/interfaces/interface";
 import {
   LineDataMock,
@@ -29,90 +30,109 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
+// import {
+//   ResponsiveContainer,
+//   LineChart as ReLineChart,
+//   XAxis,
+//   Tooltip,
+//   Line,
+//   YAxis,
+// } from "recharts";
 import {
-  ResponsiveContainer,
-  LineChart as ReLineChart,
-  XAxis,
-  Tooltip,
-  Line,
-  YAxis,
-} from "recharts";
-import {
+  BadgeDelta,
   Flex,
-  LineChart,
   Metric,
   Text,
   Card as TremorCard,
   LineChart as TremorLineChart,
 } from "@tremor/react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Analytics({
   energyData,
-  minValue,
+  comparisonData,
+  locations,
 }: {
   energyData: EnergyData[];
-  minValue: number;
+  comparisonData: EnergyComparison[];
+  locations: ServiceLocation[];
 }) {
-  const [serviceLocations, setServiceLocations] = useState<ServiceLocation[]>(
-    []
-  );
   const [devices, setDevices] = useState<DeviceListType[]>([]);
 
-  const [selectedLocation, setSelectedLocation] = useState<number | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<number | null>(
+    locations[0].locationid
+  );
+  const [energyLocation, setEnergyLocation] = useState<number | null>(
+    locations[0].locationid
+  );
+  const [dailyEnergyData, setDailyEnergyData] = useState<EnergyData[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<number | null>(null);
 
   const [deviceData, setDeviceData] = useState<deviceDataType[]>([]);
 
   const [graphFlag, setGraphFlag] = useState<boolean>(false);
 
+  energyData = energyData?.map((e) => {
+    return {
+      ...e,
+      consumption: e.sum,
+      date: new Date(e.timestamp),
+    };
+  });
+
   useEffect(() => {
-    handleSerLocApiCall();
-  }, []);
+    setDailyEnergyData(
+      energyData.filter((e) => e.locationid === energyLocation!)
+    );
+  }, [energyLocation]);
 
-  const handleSerLocApiCall = () => {
-    // Make GET call for the service locations with customerID in the payload
-    // Store Response in state
-    setServiceLocations(servLocMock);
-  };
+  const getDeltaType = (percentage: number) => {
+    if (percentage < 100 && percentage > 50) {
+      return "moderateDecrease";
+    } else if (percentage < 50) {
+      return "decrease";
+    } else if (percentage > 100 && percentage < 150) {
+      return "moderateIncrease";
+    } else if (percentage > 150) {
+      return "increase";
+    }
 
-  const handleDeviceListApiCall = (id: number) => {
-    // Make GET call for the list of devices with Location ID in the payload
-    // Store Response in state
-    setDevices(deviceListMock);
-  };
-
-  const handleDeviceDataApiCall = (id: number) => {
-    // Make GET call for the list of devices with Device ID in the payload
-    // Store Response in state
-    setDeviceData(LineDataMock);
-    setGraphFlag(true);
+    return "unchanged";
   };
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 bg-gray-900 dark:bg-gray-900">
       <div className="flex gap-4">
-        <Card className="w-full dark:bg-slate-800 h-full">
+        <Card className="w-full dark:bg-slate-800">
           <CardHeader>
             <CardTitle>Energy Consumption Comparison</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              {serviceLocations.map((row) => (
-                <div className="flex items-center">
-                  <p className="text-sm font-medium leading-none">
-                    {row.address}
-                  </p>
-                  <div className="ml-auto">125%</div>
-                </div>
-              ))}
-            </div>
+            <ScrollArea
+              className="h-52 rounded-md"
+              style={{ scrollbarColor: "white black" }}
+            >
+              <div className="space-y-6">
+                {comparisonData.map((row) => (
+                  <Flex>
+                    <div>
+                      <Text>{row.address}</Text>
+                      <Metric>{row.energyused}</Metric>
+                    </div>
+                    <BadgeDelta deltaType={getDeltaType(row.percentage)}>
+                      {row.percentage}%
+                    </BadgeDelta>
+                  </Flex>
+                ))}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
         <Card className="w-full bg-slate-800 dark:bg-slate-800">
           <CardHeader>
             <CardTitle>Energy Consumption Increase</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col justify-center">
             <div className="flex flex-col justify-center items-center gap-3">
               <div className="text-5xl font-bold text-red-500">+2350 KwH</div>
               <p className="text-lg text-muted-foreground">
@@ -126,9 +146,28 @@ export default function Analytics({
             <CardTitle>Energy Used (24hrs)</CardTitle>
           </CardHeader>
           <CardContent>
+            <Select
+              defaultValue={energyLocation!.toString()}
+              onValueChange={(v) => setEnergyLocation(parseInt(v))}
+            >
+              <SelectTrigger className="ml-auto bg-slate-900 dark:bg-slate-900">
+                <SelectValue placeholder="Select Service Location" />
+              </SelectTrigger>
+              <SelectContent>
+                {locations &&
+                  locations.map((iter) => (
+                    <SelectItem
+                      key={`${iter.locationid}`}
+                      value={`${iter.locationid}`}
+                    >
+                      {iter.address}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
             <TremorLineChart
               className="h-40"
-              data={energyData}
+              data={dailyEnergyData}
               index="timestamp"
               color="emerald"
               categories={["consumption"]}
@@ -216,31 +255,25 @@ export default function Analytics({
         <Select
           onValueChange={(value) => {
             setSelectedLocation(Number(value));
-            handleDeviceListApiCall(Number(value));
           }}
         >
           <SelectTrigger className="ml-auto w-[400px]">
             <SelectValue placeholder="Select Service Location" />
           </SelectTrigger>
           <SelectContent>
-            {serviceLocations.map((iter) => (
-              <SelectItem
-                key={`${iter.locationid}`}
-                value={`${iter.locationid}`}
-              >
-                {iter.address}
-              </SelectItem>
-            ))}
+            {locations &&
+              locations.map((iter) => (
+                <SelectItem
+                  key={`${iter.locationid}`}
+                  value={`${iter.locationid}`}
+                >
+                  {iter.address}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
 
-        <Select
-          disabled={selectedLocation === null}
-          onValueChange={(value) => {
-            setSelectedDevice(Number(value));
-            handleDeviceDataApiCall(Number(value));
-          }}
-        >
+        <Select disabled={selectedLocation === null}>
           <SelectTrigger className="ml-auto w-[400px]">
             <SelectValue placeholder="Select Device" />
           </SelectTrigger>
