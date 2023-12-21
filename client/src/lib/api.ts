@@ -1,4 +1,9 @@
-import { Device, ServiceLocation } from "@/interfaces/interface";
+import {
+  Device,
+  EnergyComparison,
+  MaxPercentIncrease,
+  ServiceLocation,
+} from "@/interfaces/interface";
 import { getAuthSessionCookie, useSession, useUser } from "./useSessionHook";
 
 export async function getLocations() {
@@ -57,4 +62,38 @@ export async function getModels() {
   });
   const data: Record<string, string[]> = await req.json();
   return new Map(Object.entries(data));
+}
+
+export async function getMaxPercentIncrease(customerId: number) {
+  const authSession = getAuthSessionCookie();
+  const req = await fetch(
+    `${process.env.API_URL}/devicedata/percentincrease?customerId=${customerId}`,
+    {
+      method: "GET",
+      next: {
+        tags: ["getMaxPercentIncrease"],
+      },
+      headers: {
+        Origin: process.env.API_URL!,
+        Host: process.env.API_HOST!,
+        Cookie: `auth_session=${authSession?.value}`,
+      },
+    }
+  );
+  const data: MaxPercentIncrease = await req.json();
+  return data;
+}
+
+export async function getEnergyComparisonData(customerId: number) {
+  const comparisonReq = await fetch(
+    `${process.env.API_URL}/devicedata/comparison?customerId=${customerId}`,
+    {
+      next: {
+        tags: [`getEnergyComparison-${customerId}`],
+      },
+    }
+  );
+  const comparisonData: { energyComparisons: EnergyComparison[] } =
+    await comparisonReq.json();
+  return comparisonData?.energyComparisons;
 }

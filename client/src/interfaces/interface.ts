@@ -65,3 +65,10 @@ export type Device = {
   devicetype: string;
   modelnumber: string;
 };
+
+export type MaxPercentIncrease = {
+  locationid: number;
+  address: string;
+  maxPercentIncrease: number;
+  increase: number;
+};

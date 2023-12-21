@@ -16,6 +16,7 @@ import {
   ServiceLocation,
   EnergyData,
   EnergyComparison,
+  MaxPercentIncrease,
 } from "@/interfaces/interface";
 import {
   LineDataMock,
@@ -52,10 +53,12 @@ export default function Analytics({
   energyData,
   comparisonData,
   locations,
+  maxPercentageIncrease,
 }: {
   energyData: EnergyData[];
   comparisonData: EnergyComparison[];
   locations: ServiceLocation[];
+  maxPercentageIncrease: MaxPercentIncrease;
 }) {
   const [devices, setDevices] = useState<DeviceListType[]>([]);
 
@@ -134,9 +137,12 @@ export default function Analytics({
           </CardHeader>
           <CardContent className="flex flex-col justify-center">
             <div className="flex flex-col justify-center items-center gap-3">
-              <div className="text-5xl font-bold text-red-500">+2350 KwH</div>
+              {maxPercentageIncrease.address}
+              <div className="text-5xl font-bold text-red-500">
+                +{maxPercentageIncrease.increase} KwH
+              </div>
               <p className="text-lg text-muted-foreground">
-                +180.1% from last month
+                +{maxPercentageIncrease.maxPercentIncrease}% from last month
               </p>
             </div>
           </CardContent>

@@ -2,7 +2,11 @@ import { useSession, useUser } from "@/lib/useSessionHook";
 import { redirect } from "next/navigation";
 import Analytics from "./analytics";
 import { EnergyComparison, EnergyData } from "@/interfaces/interface";
-import { getLocations } from "@/lib/api";
+import {
+  getEnergyComparisonData,
+  getLocations,
+  getMaxPercentIncrease,
+} from "@/lib/api";
 
 export default async function Page() {
   const session = await useSession();
@@ -22,23 +26,16 @@ export default async function Page() {
 
   const locations = await getLocations();
 
-  const comparisonReq = await fetch(
-    `${process.env.API_URL}/devicedata/comparison?customerId=${user?.customerId}`,
-    {
-      next: {
-        tags: [`getEnergyComparison-${user.customerId}`],
-      },
-    }
-  );
-  const comparisonData: { energyComparisons: EnergyComparison[] } =
-    await comparisonReq.json();
+  const comparisonData = await getEnergyComparisonData(user.customerId);
 
+  const maxPercentageIncrease = await getMaxPercentIncrease(user.customerId);
   return (
     <>
       <Analytics
         energyData={energyData ? energyData.energyConsumptions : []}
         locations={locations}
-        comparisonData={comparisonData ? comparisonData.energyComparisons : []}
+        comparisonData={comparisonData ? comparisonData : []}
+        maxPercentageIncrease={maxPercentageIncrease}
       />
     </>
   );

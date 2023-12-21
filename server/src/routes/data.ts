@@ -109,4 +109,75 @@ app.get(
   }
 );
 
+app.get(
+  "/percentincrease",
+  zValidator("query", z.object({ customerId: z.string() })),
+  async (c) => {
+    const { customerId } = c.req.valid("query");
+    const customerid = z.coerce.number().parse(customerId);
+
+    const maxPercentIncrease = await sql`
+      WITH MonthlyConsumption AS (
+          SELECT 
+              sl.LocationID,
+              EXTRACT(MONTH FROM dd.Timestamp) AS Month,
+              SUM(CAST(dd.Value AS DECIMAL)) AS EnergyUsed
+          FROM 
+              ServiceLocations sl
+          JOIN 
+              Devices d ON sl.LocationID = d.LocationID
+          JOIN 
+              DeviceData dd ON d.DeviceID = dd.DeviceID
+          WHERE 
+              dd.EventType = 'energy use' AND
+              dd.Timestamp >= NOW() - INTERVAL '2 months' AND
+              dd.Timestamp < NOW()
+          GROUP BY 
+              sl.LocationID, EXTRACT(MONTH FROM dd.Timestamp)
+      ),
+      ConsumptionChange AS (
+          SELECT 
+              a.LocationID,
+              a.EnergyUsed AS AugustConsumption,
+              s.EnergyUsed AS SeptemberConsumption,
+              ((s.EnergyUsed - a.EnergyUsed) / a.EnergyUsed) * 100 AS PercentageIncrease,
+              ((s.EnergyUsed - a.EnergyUsed)) AS Increase
+          FROM 
+              MonthlyConsumption a
+          JOIN 
+              MonthlyConsumption s ON a.LocationID = s.LocationID
+          WHERE 
+              a.Month = EXTRACT(MONTH FROM NOW() - INTERVAL '2 months') AND s.MONTH = EXTRACT(MONTH FROM NOW())
+      )
+      SELECT 
+          cc.locationid,
+          sl.address,
+          CAST(ROUND(PercentageIncrease, 2) AS Float) AS PercentIncrease,
+          CAST(ROUND(Increase, 2) AS Float) AS Increase
+      FROM 
+          ConsumptionChange cc
+          JOIN ServiceLocations sl ON sl.locationid = cc.locationid
+          JOIN Customers c ON c.customerid = sl.customerid
+          WHERE c.customerid = ${customerId}
+      ORDER BY PercentIncrease DESC
+      LIMIT 1
+    `;
+
+    if (maxPercentIncrease.length === 0) {
+      return c.json({
+        locationid: null,
+        address: null,
+        increase: null,
+        maxPercentIncrease: null,
+      });
+    }
+    return c.json({
+      maxPercentIncrease: maxPercentIncrease[0].percentincrease,
+      increase: maxPercentIncrease[0].increase,
+      address: maxPercentIncrease[0].address,
+      locationid: maxPercentIncrease[0].locationid,
+    });
+  }
+);
+
 export default app;
