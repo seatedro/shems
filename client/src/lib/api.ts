@@ -1,6 +1,7 @@
 "use server";
 import {
   Device,
+  DeviceWiseEnergyData,
   EnergyComparison,
   MaxPercentIncrease,
   OverallEnergyData,
@@ -112,4 +113,52 @@ export async function getOverallEnergyData(customerId: number, period: string) {
   const res: { overallEnergyData: OverallEnergyData[] } =
     await energyReq.json();
   return res.overallEnergyData;
+}
+
+export async function getOverallEnergy(customerId: number) {
+  const overallEnergyConsumptionAllTime = await getOverallEnergyData(
+    customerId,
+    "all"
+  );
+
+  const overallEnergyConsumptionDaily = await getOverallEnergyData(
+    customerId,
+    "daily"
+  );
+
+  const overallEnergyConsumptionWeekly = await getOverallEnergyData(
+    customerId,
+    "weekly"
+  );
+
+  const overallEnergyConsumptionHourly = await getOverallEnergyData(
+    customerId,
+    "hourly"
+  );
+
+  const overallEnergyConsumption = {
+    daily: overallEnergyConsumptionDaily,
+    weekly: overallEnergyConsumptionWeekly,
+    hourly: overallEnergyConsumptionHourly,
+    all: overallEnergyConsumptionAllTime,
+  };
+
+  return overallEnergyConsumption;
+}
+
+export async function getDeviceWiseEnergyData(
+  customerId: number,
+  devices: number[]
+) {
+  const deviceWiseEnergyReq = await fetch(
+    `${process.env.API_URL}/devicedata/device?customerId=${customerId}`,
+    {
+      next: {
+        tags: [`getDeviceWiseEnergyData-${customerId}`],
+      },
+    }
+  );
+  const res: { deviceWiseEnergyData: Record<string, DeviceWiseEnergyData[]> } =
+    await deviceWiseEnergyReq.json();
+  return res.deviceWiseEnergyData;
 }

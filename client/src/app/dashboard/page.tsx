@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 import Analytics from "./analytics";
 import { EnergyComparison, EnergyData } from "@/interfaces/interface";
 import {
+  getDeviceWiseEnergyData,
   getDevices,
   getEnergyComparisonData,
   getLocations,
   getMaxPercentIncrease,
+  getOverallEnergy,
   getOverallEnergyData,
 } from "@/lib/api";
 
@@ -34,20 +36,26 @@ export default async function Page() {
 
   const maxPercentageIncrease = await getMaxPercentIncrease(user.customerId);
 
-  const overallEnergyConsumption = await getOverallEnergyData(
+  const overallEnergyConsumption = await getOverallEnergy(user.customerId);
+
+  const deviceWiseEnergyConsumption = await getDeviceWiseEnergyData(
     user.customerId,
-    "all"
+    devices.map((device) => device.deviceid)
   );
 
   return (
     <>
       <Analytics
+        user={user}
         energyData={energyData ? energyData.energyConsumptions : []}
         locations={locations}
         devices={devices}
         comparisonData={comparisonData ? comparisonData : []}
         overallEnergyData={
-          overallEnergyConsumption ? overallEnergyConsumption : []
+          overallEnergyConsumption ? overallEnergyConsumption : {}
+        }
+        deviceWiseEnergyData={
+          deviceWiseEnergyConsumption ? deviceWiseEnergyConsumption : {}
         }
         maxPercentageIncrease={maxPercentageIncrease}
       />

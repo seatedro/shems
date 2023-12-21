@@ -78,3 +78,8 @@ export type OverallEnergyData = {
   period: string;
   start: string;
 };
+
+export type DeviceWiseEnergyData = {
+  consumption: number;
+  start: string;
+};

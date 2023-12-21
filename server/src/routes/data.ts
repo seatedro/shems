@@ -199,7 +199,7 @@ app.get(
       start = 1;
       startPeriod = "week";
       filter = "DAY";
-    } else if (period == "monthly") {
+    } else if (period == "weekly") {
       start = 1;
       startPeriod = "month";
       filter = "WEEK";
@@ -208,7 +208,7 @@ app.get(
     const overallEnergyData = await sql`
         SELECT 
             CAST(ROUND(SUM(CAST(dd.Value AS DECIMAL)), 2) AS FLOAT) AS Consumption,
-            -- EXTRACT(${sql(filter)} FROM dd.Timestamp) AS Period,
+            EXTRACT(${sql(filter)} FROM dd.Timestamp) AS Period,
             DATE_TRUNC(${filter}, dd.Timestamp) AS Start
         FROM 
             DeviceData dd
@@ -229,11 +229,10 @@ app.get(
             }
             dd.Timestamp <= NOW() AND
             c.CustomerID = ${customerid}
-        GROUP BY Start
+        GROUP BY Period, Start
         ORDER BY Start
     `;
 
-    console.log(overallEnergyData);
     if (overallEnergyData.length === 0) {
       return c.json({
         overallEnergyData: [],
@@ -241,6 +240,80 @@ app.get(
     }
     return c.json({
       overallEnergyData,
+    });
+  }
+);
+
+app.get(
+  "/device",
+  zValidator(
+    "query",
+    z.object({
+      customerId: z.string(),
+      deviceId: z.string(),
+      period: z.string(),
+    })
+  ),
+  async (c) => {
+    const { customerId, deviceId, period } = c.req.valid("query");
+    const customerid = z.coerce.number().parse(customerId);
+    const deviceid = z.coerce.number().parse(deviceId);
+
+    let start = 0,
+      filter = "MONTH",
+      startPeriod = "";
+
+    if (period == "hourly") {
+      start = 24;
+      startPeriod = "hours";
+      filter = "HOUR";
+    } else if (period == "daily") {
+      start = 1;
+      startPeriod = "week";
+      filter = "DAY";
+    } else if (period == "weekly") {
+      start = 1;
+      startPeriod = "month";
+      filter = "WEEK";
+    }
+
+    const deviceWiseEnergyData = await sql`
+        SELECT 
+            sl.LocationID,
+            sl.Address,
+            CAST(ROUND(SUM(CAST(dd.Value AS DECIMAL)), 2) AS FLOAT) AS Consumption,
+            DATE_TRUNC(${filter}, dd.Timestamp) AS Start
+        FROM 
+            DeviceData dd
+        JOIN 
+            Devices d ON dd.DeviceID = d.DeviceID
+        JOIN 
+            ServiceLocations sl ON d.LocationID = sl.LocationID
+        JOIN 
+            Customers c ON sl.CustomerID = c.CustomerID
+        WHERE 
+            dd.EventType = 'energy use' AND
+            ${
+              period !== "all"
+                ? sql`dd.Timestamp >= NOW() - ${
+                    start + " " + startPeriod
+                  }::interval AND`
+                : sql``
+            }
+            dd.Timestamp <= NOW() AND
+            d.DeviceId = ${deviceid} AND
+            c.CustomerID = ${customerid}
+        GROUP BY sl.LocationID, sl.Address, Start
+        ORDER BY sl.LocationID, Start
+    `;
+
+    if (deviceWiseEnergyData.length === 0) {
+      return c.json({
+        deviceWiseEnergyData: [],
+      });
+    }
+    return c.json({
+      deviceWiseEnergyData,
     });
   }
 );

@@ -19,6 +19,7 @@ import {
   MaxPercentIncrease,
   Device,
   OverallEnergyData,
+  DeviceWiseEnergyData,
 } from "@/interfaces/interface";
 import {
   LineDataMock,
@@ -51,33 +52,41 @@ import {
 } from "@tremor/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getOverallEnergyData } from "@/lib/api";
+import useSWR from "swr";
 
 export default function Analytics({
+  user,
   energyData,
   comparisonData,
   locations,
   devices,
   maxPercentageIncrease,
   overallEnergyData,
+  deviceWiseEnergyData,
 }: {
+  user: { username: string; customerId: number };
   energyData: EnergyData[];
   comparisonData: EnergyComparison[];
   locations: ServiceLocation[];
   devices: Device[];
   maxPercentageIncrease: MaxPercentIncrease;
-  overallEnergyData: OverallEnergyData[];
+  overallEnergyData: Record<string, OverallEnergyData[]>;
+  deviceWiseEnergyData: Record<string, DeviceWiseEnergyData[]>;
 }) {
-  const [selectedLocation, setSelectedLocation] = useState<number | null>(
-    locations[0].locationid
-  );
   const [energyLocation, setEnergyLocation] = useState<number | null>(
     locations[0].locationid
   );
   const [dailyEnergyData, setDailyEnergyData] = useState<EnergyData[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<number | null>(null);
   const [timePeriod, setTimePeriod] = useState<string>("hourly");
-
-  const [graphFlag, setGraphFlag] = useState<boolean>(false);
+  const [graphType, setGraphType] = useState<string>("overall");
+  const [overallData, setOverallData] = useState<OverallEnergyData[]>(
+    overallEnergyData["all"]
+  );
+  const [deviceData, setDeviceData] = useState<DeviceWiseEnergyData[]>(
+    deviceWiseEnergyData["all"]
+  );
 
   energyData = energyData?.map((e) => {
     return {
@@ -92,6 +101,14 @@ export default function Analytics({
       energyData.filter((e) => e.locationid === energyLocation!)
     );
   }, [energyLocation]);
+
+  useEffect(() => {
+    if (graphType == "overall") {
+      setOverallData(overallEnergyData[timePeriod]);
+    } else {
+      setDeviceData(deviceWiseEnergyData[timePeriod]);
+    }
+  }, [timePeriod]);
 
   const getDeltaType = (percentage: number) => {
     if (percentage < 100 && percentage > 50) {
@@ -205,7 +222,7 @@ export default function Analytics({
             <CardContent>
               <TremorLineChart
                 className="h-72"
-                data={overallEnergyData}
+                data={overallData}
                 index="start"
                 color="emerald"
                 categories={["consumption"]}
@@ -220,14 +237,17 @@ export default function Analytics({
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="detail">
+        <TabsContent value="detail" className="mt-8">
           <div className="grid grid-cols-3 gap-4">
             <Card className="dark:bg-slate-800">
               <CardHeader>
                 <CardTitle>Graph Type</CardTitle>
               </CardHeader>
               <CardContent>
-                <Select>
+                <Select
+                  defaultValue="overall"
+                  onValueChange={(v) => setGraphType(v)}
+                >
                   <SelectTrigger className="ml-auto w-[400px] bg-slate-900 dark:bg-slate-900">
                     <SelectValue placeholder="Select Graph Type" />
                   </SelectTrigger>
@@ -248,7 +268,6 @@ export default function Analytics({
                     <SelectValue placeholder="Select Device" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-900 dark:bg-slate-900">
-                    <SelectItem value="all">All</SelectItem>
                     {devices.map((iter) => (
                       <SelectItem
                         key={`${iter.deviceid}`}
@@ -266,7 +285,12 @@ export default function Analytics({
                 <CardTitle>Time Period</CardTitle>
               </CardHeader>
               <CardContent>
-                <Select onValueChange={(v) => setTimePeriod(v)}>
+                <Select
+                  onValueChange={async (v) => {
+                    setTimePeriod(v);
+                  }}
+                  defaultValue="hourly"
+                >
                   <SelectTrigger className="ml-auto w-[400px] bg-slate-900 dark:bg-slate-900">
                     <SelectValue placeholder="Select time period" />
                   </SelectTrigger>
@@ -280,11 +304,26 @@ export default function Analytics({
               </CardContent>
             </Card>
           </div>
+          <Card className="dark:bg-slate-950 bg-slate 950 mt-8">
+            <CardHeader>
+              <CardTitle>Energy Consumption</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {graphType == "overall" ? (
+                <OverallGraph data={overallData} />
+              ) : (
+                <DeviceGraph
+                  customerId={user.customerId}
+                  deviceId={selectedDevice!}
+                  period={timePeriod}
+                />
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
-      {graphFlag && (
-        <ResponsiveLine
+      {/* <ResponsiveLine
           data={LineDataMock}
           margin={{ top: 50, right: 150, bottom: 50, left: 100 }}
           xScale={{ type: "point" }}
@@ -359,8 +398,67 @@ export default function Analytics({
               ],
             },
           ]}
-        />
-      )}
+        /> */}
     </main>
+  );
+}
+
+//@ts-ignore
+const fetcher = ([url, queryParams = ""]) =>
+  fetch(`${url}${queryParams}`).then((res) => res.json());
+
+function OverallGraph({ data }: { data: OverallEnergyData[] }) {
+  return (
+    <TremorLineChart
+      className="h-72"
+      data={data}
+      index="start"
+      color="emerald"
+      categories={["consumption"]}
+      showLegend={true}
+      showXAxis={true}
+      showYAxis={true}
+      // yAxisWidth={50}
+      showAnimation={true}
+      autoMinValue={true}
+      curveType="monotone"
+    ></TremorLineChart>
+  );
+}
+
+function DeviceGraph({
+  customerId,
+  deviceId,
+  period,
+}: {
+  customerId: number;
+  deviceId: number;
+  period: string;
+}) {
+  if (!customerId || !deviceId || !period) return null;
+  const { data, error } = useSWR(
+    [
+      "/api/data",
+      `?customerId=${customerId}&deviceId=${deviceId}&period=${period}`,
+    ],
+    fetcher
+  );
+
+  if (error) return <div>failed to load</div>;
+  return (
+    <TremorLineChart
+      className="h-72"
+      data={data}
+      index="start"
+      color="emerald"
+      categories={["consumption"]}
+      showLegend={true}
+      showXAxis={true}
+      showYAxis={true}
+      // yAxisWidth={50}
+      showAnimation={true}
+      autoMinValue={true}
+      curveType="monotone"
+    ></TremorLineChart>
   );
 }
