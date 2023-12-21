@@ -180,4 +180,69 @@ app.get(
   }
 );
 
+app.get(
+  "/overall",
+  zValidator("query", z.object({ customerId: z.string(), period: z.string() })),
+  async (c) => {
+    const { customerId, period } = c.req.valid("query");
+    const customerid = z.coerce.number().parse(customerId);
+
+    let start = 0,
+      filter = "MONTH",
+      startPeriod = "";
+
+    if (period == "hourly") {
+      start = 24;
+      startPeriod = "hours";
+      filter = "HOUR";
+    } else if (period == "daily") {
+      start = 1;
+      startPeriod = "week";
+      filter = "DAY";
+    } else if (period == "monthly") {
+      start = 1;
+      startPeriod = "month";
+      filter = "WEEK";
+    }
+
+    const overallEnergyData = await sql`
+        SELECT 
+            CAST(ROUND(SUM(CAST(dd.Value AS DECIMAL)), 2) AS FLOAT) AS Consumption,
+            -- EXTRACT(${sql(filter)} FROM dd.Timestamp) AS Period,
+            DATE_TRUNC(${filter}, dd.Timestamp) AS Start
+        FROM 
+            DeviceData dd
+        JOIN 
+            Devices d ON dd.DeviceID = d.DeviceID
+        JOIN 
+            ServiceLocations sl ON d.LocationID = sl.LocationID
+        JOIN 
+            Customers c ON sl.CustomerID = c.CustomerID
+        WHERE 
+            dd.EventType = 'energy use' AND
+            ${
+              period !== "all"
+                ? sql`dd.Timestamp >= NOW() - ${
+                    start + " " + startPeriod
+                  }::interval AND`
+                : sql``
+            }
+            dd.Timestamp <= NOW() AND
+            c.CustomerID = ${customerid}
+        GROUP BY Start
+        ORDER BY Start
+    `;
+
+    console.log(overallEnergyData);
+    if (overallEnergyData.length === 0) {
+      return c.json({
+        overallEnergyData: [],
+      });
+    }
+    return c.json({
+      overallEnergyData,
+    });
+  }
+);
+
 export default app;

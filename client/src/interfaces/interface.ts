@@ -72,3 +72,9 @@ export type MaxPercentIncrease = {
   maxPercentIncrease: number;
   increase: number;
 };
+
+export type OverallEnergyData = {
+  consumption: number;
+  period: string;
+  start: string;
+};

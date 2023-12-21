@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 import Analytics from "./analytics";
 import { EnergyComparison, EnergyData } from "@/interfaces/interface";
 import {
+  getDevices,
   getEnergyComparisonData,
   getLocations,
   getMaxPercentIncrease,
+  getOverallEnergyData,
 } from "@/lib/api";
 
 export default async function Page() {
@@ -26,15 +28,27 @@ export default async function Page() {
 
   const locations = await getLocations();
 
+  const devices = await getDevices();
+
   const comparisonData = await getEnergyComparisonData(user.customerId);
 
   const maxPercentageIncrease = await getMaxPercentIncrease(user.customerId);
+
+  const overallEnergyConsumption = await getOverallEnergyData(
+    user.customerId,
+    "all"
+  );
+
   return (
     <>
       <Analytics
         energyData={energyData ? energyData.energyConsumptions : []}
         locations={locations}
+        devices={devices}
         comparisonData={comparisonData ? comparisonData : []}
+        overallEnergyData={
+          overallEnergyConsumption ? overallEnergyConsumption : []
+        }
         maxPercentageIncrease={maxPercentageIncrease}
       />
     </>

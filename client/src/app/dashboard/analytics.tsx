@@ -17,6 +17,8 @@ import {
   EnergyData,
   EnergyComparison,
   MaxPercentIncrease,
+  Device,
+  OverallEnergyData,
 } from "@/interfaces/interface";
 import {
   LineDataMock,
@@ -48,20 +50,23 @@ import {
   LineChart as TremorLineChart,
 } from "@tremor/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Analytics({
   energyData,
   comparisonData,
   locations,
+  devices,
   maxPercentageIncrease,
+  overallEnergyData,
 }: {
   energyData: EnergyData[];
   comparisonData: EnergyComparison[];
   locations: ServiceLocation[];
+  devices: Device[];
   maxPercentageIncrease: MaxPercentIncrease;
+  overallEnergyData: OverallEnergyData[];
 }) {
-  const [devices, setDevices] = useState<DeviceListType[]>([]);
-
   const [selectedLocation, setSelectedLocation] = useState<number | null>(
     locations[0].locationid
   );
@@ -70,8 +75,7 @@ export default function Analytics({
   );
   const [dailyEnergyData, setDailyEnergyData] = useState<EnergyData[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<number | null>(null);
-
-  const [deviceData, setDeviceData] = useState<deviceDataType[]>([]);
+  const [timePeriod, setTimePeriod] = useState<string>("hourly");
 
   const [graphFlag, setGraphFlag] = useState<boolean>(false);
 
@@ -104,197 +108,180 @@ export default function Analytics({
   };
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 bg-gray-900 dark:bg-gray-900">
-      <div className="flex gap-4">
-        <Card className="w-full dark:bg-slate-800">
-          <CardHeader>
-            <CardTitle>Energy Consumption Comparison</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea
-              className="h-52 rounded-md"
-              style={{ scrollbarColor: "white black" }}
-            >
-              <div className="space-y-6">
-                {comparisonData.map((row) => (
-                  <Flex>
-                    <div>
-                      <Text>{row.address}</Text>
-                      <Metric>{row.energyused}</Metric>
-                    </div>
-                    <BadgeDelta deltaType={getDeltaType(row.percentage)}>
-                      {row.percentage}%
-                    </BadgeDelta>
-                  </Flex>
-                ))}
-              </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-        <Card className="w-full bg-slate-800 dark:bg-slate-800">
-          <CardHeader>
-            <CardTitle>Energy Consumption Increase</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col justify-center">
-            <div className="flex flex-col justify-center items-center gap-3">
-              {maxPercentageIncrease.address}
-              <div className="text-5xl font-bold text-red-500">
-                +{maxPercentageIncrease.increase} KwH
-              </div>
-              <p className="text-lg text-muted-foreground">
-                +{maxPercentageIncrease.maxPercentIncrease}% from last month
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="w-full bg-slate-800 dark:bg-slate-800">
-          <CardHeader>
-            <CardTitle>Energy Used (24hrs)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select
-              defaultValue={energyLocation!.toString()}
-              onValueChange={(v) => setEnergyLocation(parseInt(v))}
-            >
-              <SelectTrigger className="ml-auto bg-slate-900 dark:bg-slate-900">
-                <SelectValue placeholder="Select Service Location" />
-              </SelectTrigger>
-              <SelectContent>
-                {locations &&
-                  locations.map((iter) => (
-                    <SelectItem
-                      key={`${iter.locationid}`}
-                      value={`${iter.locationid}`}
-                    >
-                      {iter.address}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-            <TremorLineChart
-              className="h-40"
-              data={dailyEnergyData}
-              index="timestamp"
-              color="emerald"
-              categories={["consumption"]}
-              showLegend={false}
-              showXAxis={false}
-              showYAxis={false}
-              yAxisWidth={10}
-              showAnimation={true}
-              autoMinValue={true}
-              curveType="monotone"
-            />
-            {/* 
-            <ReLineChart
-              width={400}
-              height={100}
-              data={energyData}
-              margin={{ top: 25 }}
-            >
-              <YAxis domain={[minValue - 0.5, "auto"]} hide={true} />
-              <Tooltip />
-              <Line type="monotone" dataKey="consumption" stroke="red" />
-            </ReLineChart> */}
-          </CardContent>
-        </Card>
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="dark:bg-slate-800">
-          <CardHeader>
-            <CardTitle>Graph Type</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select>
-              <SelectTrigger className="ml-auto w-[400px] bg-slate-900 dark:bg-slate-900">
-                <SelectValue placeholder="Select Graph Type" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-900 dark:bg-slate-900">
-                <SelectItem value="overall">Overall</SelectItem>
-                <SelectItem value="deviceWise">Device-Wise</SelectItem>
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-        <Card className="dark:bg-slate-800">
-          <CardHeader>
-            <CardTitle>Device</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select>
-              <SelectTrigger className="ml-auto w-[400px] bg-slate-900 dark:bg-slate-900">
-                <SelectValue placeholder="Select Device" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-900 dark:bg-slate-900">
-                <SelectItem value="all">All</SelectItem>
-                {devices.map((iter) => (
-                  <SelectItem
-                    key={`${iter.deviceid}`}
-                    value={`${iter.deviceid}`}
-                  >
-                    {iter.devicetype} {"--"} {iter.modelnumber}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-        <Card className="dark:bg-slate-800">
-          <CardHeader>
-            <CardTitle>Time Period</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select>
-              <SelectTrigger className="ml-auto w-[400px] bg-slate-900 dark:bg-slate-900">
-                <SelectValue placeholder="Select time period" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-900 dark:bg-slate-900">
-                <SelectItem value="hourly">Last 24 hrs</SelectItem>
-                <SelectItem value="daily">Last week</SelectItem>
-                <SelectItem value="weekly">Last month</SelectItem>
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="flex items-center">
-        <Select
-          onValueChange={(value) => {
-            setSelectedLocation(Number(value));
-          }}
-        >
-          <SelectTrigger className="ml-auto w-[400px]">
-            <SelectValue placeholder="Select Service Location" />
-          </SelectTrigger>
-          <SelectContent>
-            {locations &&
-              locations.map((iter) => (
-                <SelectItem
-                  key={`${iter.locationid}`}
-                  value={`${iter.locationid}`}
+    <main className="dark flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 bg-gray-900 dark:bg-gray-900">
+      <Tabs defaultValue="overview">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="detail">Detail</TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview" className="mt-8">
+          <div className="flex gap-4">
+            <Card className="w-full dark:bg-slate-800">
+              <CardHeader>
+                <CardTitle>Energy Consumption Comparison</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea
+                  className="h-52 rounded-md"
+                  style={{ scrollbarColor: "white black" }}
                 >
-                  {iter.address}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-
-        <Select disabled={selectedLocation === null}>
-          <SelectTrigger className="ml-auto w-[400px]">
-            <SelectValue placeholder="Select Device" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Devices</SelectLabel>
-              {devices.map((iter) => (
-                <SelectItem key={`${iter.deviceid}`} value={`${iter.deviceid}`}>
-                  {iter.devicetype} {"--"} {iter.modelnumber}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
+                  <div className="space-y-6">
+                    {comparisonData.map((row) => (
+                      <Flex>
+                        <div>
+                          <Text>{row.address}</Text>
+                          <Metric>{row.energyused}</Metric>
+                        </div>
+                        <BadgeDelta deltaType={getDeltaType(row.percentage)}>
+                          {row.percentage}%
+                        </BadgeDelta>
+                      </Flex>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+            <Card className="w-full bg-slate-800 dark:bg-slate-800">
+              <CardHeader>
+                <CardTitle>Energy Consumption Increase</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col justify-center">
+                <div className="flex flex-col justify-center items-center gap-3">
+                  {maxPercentageIncrease.address}
+                  <div className="text-5xl font-bold text-red-500">
+                    +{maxPercentageIncrease.increase} KwH
+                  </div>
+                  <p className="text-lg text-muted-foreground">
+                    +{maxPercentageIncrease.maxPercentIncrease}% from last month
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="w-full bg-slate-800 dark:bg-slate-800">
+              <CardHeader>
+                <CardTitle>Energy Used (24hrs)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Select
+                  defaultValue={energyLocation!.toString()}
+                  onValueChange={(v) => setEnergyLocation(parseInt(v))}
+                >
+                  <SelectTrigger className="ml-auto bg-slate-900 dark:bg-slate-900">
+                    <SelectValue placeholder="Select Service Location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations &&
+                      locations.map((iter) => (
+                        <SelectItem
+                          key={`${iter.locationid}`}
+                          value={`${iter.locationid}`}
+                        >
+                          {iter.address}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <TremorLineChart
+                  className="h-40"
+                  data={dailyEnergyData}
+                  index="timestamp"
+                  color="emerald"
+                  categories={["consumption"]}
+                  showLegend={false}
+                  showXAxis={false}
+                  showYAxis={false}
+                  yAxisWidth={10}
+                  showAnimation={true}
+                  autoMinValue={true}
+                  curveType="monotone"
+                />
+              </CardContent>
+            </Card>
+          </div>
+          <Card className="w-full dark:bg-slate-950 bg-slate-950 mt-8">
+            <CardHeader>
+              <CardTitle>Overall Energy Consumption</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TremorLineChart
+                className="h-72"
+                data={overallEnergyData}
+                index="start"
+                color="emerald"
+                categories={["consumption"]}
+                showLegend={true}
+                showXAxis={true}
+                showYAxis={true}
+                // yAxisWidth={50}
+                showAnimation={true}
+                autoMinValue={true}
+                curveType="monotone"
+              ></TremorLineChart>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="detail">
+          <div className="grid grid-cols-3 gap-4">
+            <Card className="dark:bg-slate-800">
+              <CardHeader>
+                <CardTitle>Graph Type</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Select>
+                  <SelectTrigger className="ml-auto w-[400px] bg-slate-900 dark:bg-slate-900">
+                    <SelectValue placeholder="Select Graph Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 dark:bg-slate-900">
+                    <SelectItem value="overall">Overall</SelectItem>
+                    <SelectItem value="deviceWise">Device-Wise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+            <Card className="dark:bg-slate-800">
+              <CardHeader>
+                <CardTitle>Device</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Select onValueChange={(v) => setSelectedDevice(parseInt(v))}>
+                  <SelectTrigger className="ml-auto w-[400px] bg-slate-900 dark:bg-slate-900">
+                    <SelectValue placeholder="Select Device" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 dark:bg-slate-900">
+                    <SelectItem value="all">All</SelectItem>
+                    {devices.map((iter) => (
+                      <SelectItem
+                        key={`${iter.deviceid}`}
+                        value={`${iter.deviceid}`}
+                      >
+                        {iter.devicetype} {"--"} {iter.modelnumber}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+            <Card className="dark:bg-slate-800">
+              <CardHeader>
+                <CardTitle>Time Period</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Select onValueChange={(v) => setTimePeriod(v)}>
+                  <SelectTrigger className="ml-auto w-[400px] bg-slate-900 dark:bg-slate-900">
+                    <SelectValue placeholder="Select time period" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 dark:bg-slate-900">
+                    <SelectItem value="hourly">Last 24 hrs</SelectItem>
+                    <SelectItem value="daily">Last week</SelectItem>
+                    <SelectItem value="weekly">Last month</SelectItem>
+                    <SelectItem value="all">All Time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {graphFlag && (
         <ResponsiveLine

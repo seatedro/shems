@@ -1,7 +1,9 @@
+"use server";
 import {
   Device,
   EnergyComparison,
   MaxPercentIncrease,
+  OverallEnergyData,
   ServiceLocation,
 } from "@/interfaces/interface";
 import { getAuthSessionCookie, useSession, useUser } from "./useSessionHook";
@@ -96,4 +98,18 @@ export async function getEnergyComparisonData(customerId: number) {
   const comparisonData: { energyComparisons: EnergyComparison[] } =
     await comparisonReq.json();
   return comparisonData?.energyComparisons;
+}
+
+export async function getOverallEnergyData(customerId: number, period: string) {
+  const energyReq = await fetch(
+    `${process.env.API_URL}/devicedata/overall?customerId=${customerId}&period=${period}`,
+    {
+      next: {
+        tags: [`getOverallEnergyData-${customerId}`],
+      },
+    }
+  );
+  const res: { overallEnergyData: OverallEnergyData[] } =
+    await energyReq.json();
+  return res.overallEnergyData;
 }
