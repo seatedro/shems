@@ -1,17 +1,17 @@
 "use client";
-import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-  DropdownMenuContent,
   DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { usePathname } from "next/navigation";
+import { logout } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import { BarChartIcon } from "lucide-react";
-import { logout } from "@/lib/actions";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({
   children,
@@ -28,10 +28,6 @@ export default function DashboardLayout({
               <BarChartIcon className="h-6 w-6" />
               <span>SHEMS</span>
             </Link>
-            <Button className="ml-auto h-8 w-8" size="icon" variant="outline">
-              <BellIcon className="h-4 w-4" />
-              <span className="sr-only">Toggle notifications</span>
-            </Button>
           </div>
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">

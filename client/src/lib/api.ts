@@ -8,7 +8,7 @@ import {
   OverallEnergyData,
   ServiceLocation,
 } from "@/interfaces/interface";
-import { getAuthSessionCookie, useSession, useUser } from "./useSessionHook";
+import { getAuthSessionCookie, useUser } from "./useSessionHook";
 
 export async function getLocations() {
   const authSession = getAuthSessionCookie();

@@ -1,6 +1,7 @@
-import Link from "next/link";
-import { CardHeader, CardContent, Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useSession } from "@/lib/useSessionHook";
+import { BarChartIcon } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Landing() {
@@ -12,7 +13,7 @@ export default async function Landing() {
     <>
       <header className="px-4 lg:px-6 h-14 flex items-center bg-slate-900">
         <Link className="flex items-center justify-center" href="#">
-          <HomeIcon className="h-6 w-6" />
+          <BarChartIcon className="h-6 w-6" />
           <span className="sr-only">Smart Energy Home</span>
         </Link>
       </header>

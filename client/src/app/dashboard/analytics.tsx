@@ -1,40 +1,23 @@
 "use client";
-import { useEffect, useState } from "react";
-import { ResponsiveLine } from "@nivo/line";
-import {
-  SelectValue,
-  SelectTrigger,
-  SelectLabel,
-  SelectItem,
-  SelectGroup,
-  SelectContent,
-  Select,
-} from "@/components/ui/select";
-import {
-  DeviceListType,
-  deviceDataType,
-  ServiceLocation,
-  EnergyData,
-  EnergyComparison,
-  MaxPercentIncrease,
-  Device,
-  OverallEnergyData,
-  DeviceWiseEnergyData,
-  BillData,
-} from "@/interfaces/interface";
-import {
-  LineDataMock,
-  deviceListMock,
-  servLocMock,
-} from "@/constants/static_constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableRow,
-} from "@/components/ui/table";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  BillData,
+  Device,
+  DeviceWiseEnergyData,
+  EnergyComparison,
+  EnergyData,
+  MaxPercentIncrease,
+  OverallEnergyData,
+  ServiceLocation,
+} from "@/interfaces/interface";
+import { useEffect, useState } from "react";
 // import {
 //   ResponsiveContainer,
 //   LineChart as ReLineChart,
@@ -43,6 +26,8 @@ import {
 //   Line,
 //   YAxis,
 // } from "recharts";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BadgeDelta,
   BarList,
@@ -51,13 +36,12 @@ import {
   Metric,
   Text,
   Title,
-  Card as TremorCard,
   LineChart as TremorLineChart,
 } from "@tremor/react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getOverallEnergyData } from "@/lib/api";
 import useSWR from "swr";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export default function Analytics({
   user,
@@ -373,83 +357,6 @@ export default function Analytics({
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* <ResponsiveLine
-          data={LineDataMock}
-          margin={{ top: 50, right: 150, bottom: 50, left: 100 }}
-          xScale={{ type: "point" }}
-          yScale={{
-            type: "linear",
-            min: "auto",
-            max: "auto",
-            stacked: true,
-            reverse: false,
-          }}
-          yFormat=" >-.2f"
-          axisTop={null}
-          axisRight={null}
-          axisBottom={{
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: "transportation",
-            legendOffset: 36,
-            legendPosition: "middle",
-          }}
-          axisLeft={{
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: "count",
-            legendOffset: -40,
-            legendPosition: "middle",
-          }}
-          pointSize={10}
-          // pointColor={{ theme: "background" }}
-          pointBorderWidth={2}
-          // pointBorderColor={{ from: "serieColor" }}
-          pointLabelYOffset={-12}
-          useMesh={true}
-          theme={{
-            background: "#1e293b",
-            text: {
-              fill: "white",
-            },
-            tooltip: {
-              basic: {
-                color: "black",
-              },
-            },
-          }}
-          enableGridX={false}
-          enableGridY={false}
-          legends={[
-            {
-              anchor: "bottom-right",
-              direction: "column",
-              justify: false,
-              translateX: 100,
-              translateY: 0,
-              itemsSpacing: 0,
-              itemDirection: "left-to-right",
-              itemWidth: 80,
-              itemHeight: 20,
-              itemOpacity: 0.75,
-              symbolSize: 12,
-              symbolShape: "circle",
-              symbolBorderColor: "rgba(0, 0, 0, .5)",
-              effects: [
-                {
-                  on: "hover",
-                  style: {
-                    itemBackground: "rgba(0, 0, 0, .03)",
-                    itemOpacity: 1,
-                  },
-                },
-              ],
-            },
-          ]}
-        /> */}
     </main>
   );
 }
@@ -487,7 +394,7 @@ function DeviceGraph({
   period: string;
 }) {
   if (!customerId || !deviceId || !period) return null;
-  const { data, error } = useSWR(
+  const { data, isLoading, error } = useSWR(
     [
       "/api/data",
       `?customerId=${customerId}&deviceId=${deviceId}&period=${period}`,
@@ -495,7 +402,17 @@ function DeviceGraph({
     fetcher
   );
 
-  if (error) return <div>failed to load</div>;
+  if (error)
+    return (
+      <>
+        <Alert variant="destructive">
+          <AlertCircle className="w-6 h-6 mr-2" />
+          <AlertTitle>Fetch Failed</AlertTitle>
+          <AlertDescription>Failed to fetch data for device</AlertDescription>
+        </Alert>
+      </>
+    );
+  if (isLoading) return <Skeleton className="w-full h-72" />;
   return (
     <TremorLineChart
       className="h-72"

@@ -330,7 +330,7 @@ app.get(
         sl.LocationID,
         sl.Address,
         DATE_TRUNC('month', dd.Timestamp) AS Month,
-        CAST(SUM(CAST(dd.Value AS DECIMAL) * ep.PricePerKWh) AS FLOAT) AS Cost
+        CAST(ROUND(SUM(CAST(dd.Value AS DECIMAL) * ep.PricePerKWh), 2) AS FLOAT) AS Cost
     FROM 
         DeviceData dd
     JOIN 
@@ -343,7 +343,7 @@ app.get(
         EnergyPrices ep ON sl.ZipCode = ep.ZipCode 
         AND DATE_TRUNC('hour', dd.Timestamp) = DATE_TRUNC('hour', ep.Time)
     WHERE 
-        c.CustomerID = ${customerId}
+        c.CustomerID = ${customerid}
         AND dd.EventType = 'energy use'
         AND EXTRACT(MONTH FROM dd.Timestamp) = EXTRACT(MONTH FROM NOW())
     GROUP BY 
@@ -364,7 +364,7 @@ app.get(
 
     return c.json({
       bill,
-      total,
+      total: total.toFixed(2),
     });
   }
 );

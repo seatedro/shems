@@ -1,7 +1,4 @@
-import { useSession, useUser } from "@/lib/useSessionHook";
-import { redirect } from "next/navigation";
-import Analytics from "./analytics";
-import { EnergyComparison, EnergyData } from "@/interfaces/interface";
+import { EnergyData } from "@/interfaces/interface";
 import {
   getBillData,
   getDeviceWiseEnergyData,
@@ -10,8 +7,10 @@ import {
   getLocations,
   getMaxPercentIncrease,
   getOverallEnergy,
-  getOverallEnergyData,
 } from "@/lib/api";
+import { useSession, useUser } from "@/lib/useSessionHook";
+import { redirect } from "next/navigation";
+import Analytics from "./analytics";
 
 export default async function Page() {
   const session = await useSession();

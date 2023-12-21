@@ -77,8 +77,12 @@ app.post("/signup", async (c) => {
 });
 
 app.post("/login", async (c) => {
-  console.log("~~~~~~~~~LOGIN");
-  const { username, password } = await c.req.json();
+  const body = await c.req.json();
+  const schema = z.object({
+    username: z.string().min(3).max(31),
+    password: z.string().min(5).max(255),
+  });
+  const { username, password } = schema.parse(body);
   if (
     typeof username !== "string" ||
     username.length < 3 ||
