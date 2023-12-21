@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,7 +21,8 @@ import {
 import { ServiceLocation } from "@/interfaces/interface";
 import { addDevice } from "@/lib/actions";
 import { CheckIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 export function AddDeviceDialog({
   onSubmit,
   serviceLocations,
@@ -31,10 +33,28 @@ export function AddDeviceDialog({
   models: Map<string, string[]>;
 }) {
   const [deviceType, setDeviceType] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors },
+  // } = useForm({ mode: "onChange", delayError: 1000 });
+
+  // const formRef = useRef<HTMLFormElement>(null);
+
+  // const handler = handleSubmit((data) => {
+  //   console.log(data);
+  //   startTransition(() => addDevice(data as any));
+  //   onSubmit();
+  //   setDialogOpen(false);
+  // });
   return (
-    <Dialog>
+    <Dialog open={dialogOpen}>
       <DialogTrigger className="ml-auto" asChild>
-        <Button size="sm">Add Device</Button>
+        <Button size="sm" onClick={() => setDialogOpen(true)}>
+          Add Device
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -44,7 +64,11 @@ export function AddDeviceDialog({
             done.
           </DialogDescription>
         </DialogHeader>
-        <form action={addDevice} onSubmit={() => onSubmit()}>
+        <form
+          action={addDevice}
+          // onSubmit={}
+          id="add-device"
+        >
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Select name="locationid" onValueChange={(e) => setDeviceType(e)}>
@@ -99,13 +123,18 @@ export function AddDeviceDialog({
               </Select>
             </div>
           </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="submit">
-                <CheckIcon /> Save
-              </Button>
-            </DialogClose>
-          </DialogFooter>
+          {/* <DialogFooter> */}
+          {/* <DialogClose asChild> */}
+          <Button type="submit" form="add-device">
+            <CheckIcon /> Save
+          </Button>
+          {/* <div className="flex justify-between">
+            <Button variant="ghost" onClick={() => setDialogOpen(false)}>
+              Close
+            </Button>
+          </div> */}
+          {/* </DialogClose> */}
+          {/* </DialogFooter> */}
         </form>
       </DialogContent>
     </Dialog>

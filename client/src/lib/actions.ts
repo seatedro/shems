@@ -4,12 +4,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAuthSessionCookie, useSession, useUser } from "./useSessionHook";
 
-export async function login(formData: FormData) {
-  // Perform login logic here
-  const loginReq = Object.fromEntries(formData);
-
-  // Use fetch to make a post request to the server
-  console.log(process.env.API_URL);
+export type LoginFormData = {
+  username: string;
+  password: string;
+};
+export async function login(loginReq: LoginFormData) {
   const response = await fetch(`${process.env.API_URL}/login`, {
     method: "POST",
     body: JSON.stringify(loginReq),
@@ -38,9 +37,14 @@ export async function logout() {
   }
 }
 
-export async function register(formData: FormData) {
+export type SignupFormData = {
+  username: string;
+  name: string;
+  billingAddress: string;
+  password: string;
+};
+export async function register(registerReq: SignupFormData) {
   // Perform register logic here
-  const registerReq = Object.fromEntries(formData);
 
   // Use fetch to make a post request to the server
   const response = await fetch(`${process.env.API_URL}/signup`, {
@@ -84,14 +88,15 @@ export async function completeProfile(formData: FormData) {
 export async function addLocation(formData: FormData) {
   const user = await useUser();
   const req = {
-    locationtype: formData.get("locationtype"),
-    address: formData.get("address"),
-    unitnumber: formData.get("unitnumber"),
-    dateacquired: formData.get("dateacquired"),
-    zipcode: formData.get("zipcode"),
-    squarefootage: formData.get("squarefootage"),
-    numberofbedrooms: formData.get("numberofbedrooms"),
-    numberofoccupants: formData.get("numberofoccupants"),
+    // locationtype: formData.get("locationtype"),
+    // address: formData.get("address"),
+    // unitnumber: formData.get("unitnumber"),
+    // dateacquired: formData.get("dateacquired"),
+    // zipcode: formData.get("zipcode"),
+    // squarefootage: formData.get("squarefootage"),
+    // numberofbedrooms: formData.get("numberofbedrooms"),
+    // numberofoccupants: formData.get("numberofoccupants"),
+    ...formData,
     customerid: user.customerId,
   };
   const authSessionCookie = getAuthSessionCookie();
@@ -123,16 +128,16 @@ export async function deleteLocation(rowId: number) {
 }
 
 export async function addDevice(formData: FormData) {
-  console.log("addDevice", formData);
-  const req = {
-    locationid: formData.get("locationid"),
-    devicetype: formData.get("type"),
-    modelnumber: formData.get("modelnumber"),
-  };
+  // console.log("addDevice", formData);
+  // const req = {
+  //   locationid: formData.get("locationid"),
+  //   devicetype: formData.get("type"),
+  //   modelnumber: formData.get("modelnumber"),
+  // };
   const authSessionCookie = getAuthSessionCookie();
   const response = await fetch(`${process.env.API_URL}/devices`, {
     method: "POST",
-    body: JSON.stringify(req),
+    body: JSON.stringify(formData),
     headers: {
       Origin: process.env.API_URL!,
       Host: process.env.API_HOST!,

@@ -2,10 +2,31 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
-import { register } from "@/lib/actions";
+import { register as signup, type SignupFormData } from "@/lib/actions";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Signup() {
   const { pending } = useFormStatus();
+  const [isPending, startTransition] = useTransition();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupFormData>({ mode: "onChange", delayError: 1000 });
+
+  const onSubmit = handleSubmit((data) => {
+    startTransition(() => signup(data as any));
+  });
 
   return (
     <div
@@ -25,8 +46,8 @@ export default function Signup() {
             href={`${process.env.NEXT_PUBLIC_API_URL}/login/github`}
             passHref={true}
           >
-            <Button className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 px-4 rounded">
-              <GithubIcon className="text-white" />
+            <Button className="w-full flex items-center justify-center gap-2 dark:bg-white bg-white dark:hover:bg-gray-300 hover:bg-gray-300 py-3 px-4 rounded">
+              <GithubIcon className="text-black dark:text-black hover:text-white dark:hover:text-white" />
               Continue with GitHub
             </Button>
           </Link>
@@ -36,42 +57,117 @@ export default function Signup() {
           <p className="text-gray-400 px-3">or</p>
           <hr className="w-full bg-gray-700" />
         </div>
-        <form className="space-y-6" action={register}>
-          <div className="flex flex-col">
+        <form className="space-y-6" onSubmit={onSubmit}>
+          <div className="flex">
             <input
               className="w-full bg-gray-700 text-white py-3 px-4 rounded"
               id="username"
-              name="username"
               placeholder="Username"
               type="text"
+              {...register("username", {
+                required: true,
+                minLength: 3,
+                maxLength: 31,
+              })}
             />
+            {errors.username && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="destructive" className="ml-2 h-8">
+                      <AlertCircle className="w-3 h-3" />
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Username must be between 3 and 31 characters long
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
-          <div className="flex flex-col">
+          <div className="flex">
             <input
               className="w-full bg-gray-700 text-white py-3 px-4 rounded"
               id="name"
-              name="name"
               placeholder="Full Name"
               type="text"
+              {...register("name", {
+                required: true,
+                minLength: 3,
+                maxLength: 255,
+              })}
             />
+            {errors.name && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="destructive" className="ml-2 h-8">
+                      <AlertCircle className="w-3 h-3" />
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Full Name must be between 3 and 255 characters long
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
-          <div className="flex flex-col">
+          <div className="flex">
             <input
               className="w-full bg-gray-700 text-white py-3 px-4 rounded"
               id="address"
-              name="billingAddress"
               placeholder="Address"
               type="text"
+              {...register("billingAddress", {
+                required: true,
+                minLength: 3,
+                maxLength: 255,
+              })}
             />
+            {errors.billingAddress && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="destructive" className="ml-2 h-8">
+                      <AlertCircle className="w-3 h-3" />
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Billing Address must be between 3 and 255 characters long
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
-          <div className="flex flex-col">
+          <div className="flex">
             <input
               className="w-full bg-gray-700 text-white py-3 px-4 rounded"
               id="password"
-              name="password"
               placeholder="Password"
               type="password"
+              {...register("password", {
+                required: true,
+                minLength: 5,
+                maxLength: 24,
+                pattern:
+                  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+              })}
             />
+            {errors.password && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="destructive" className="ml-2 h-8">
+                      <AlertCircle className="w-3 h-3" />
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Password must be between 5 and 24 characters long and
+                    contain at least one number and one special character
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
           <Button
             className="w-full bg-black py-3 px-4 rounded text-white"

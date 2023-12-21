@@ -26,7 +26,7 @@ app.post("/signup", async (c) => {
   const body = await c.req.json();
   const schema = z.object({
     username: z.string().min(3).max(31),
-    password: z.string().min(5).max(255),
+    password: z.string().min(5).max(24),
     name: z.string().min(3).max(255),
     billingAddress: z.string().min(3).max(255),
   });
@@ -77,40 +77,49 @@ app.post("/signup", async (c) => {
 });
 
 app.post("/login", async (c) => {
-  const body = await c.req.json();
-  const schema = z.object({
-    username: z.string().min(3).max(31),
-    password: z.string().min(5).max(255),
-  });
-  const { username, password } = schema.parse(body);
-  if (
-    typeof username !== "string" ||
-    username.length < 3 ||
-    username.length > 31
-  ) {
-    return c.json({ message: "Invalid username" }, 400);
-  }
-  if (
-    typeof password !== "string" ||
-    password.length < 5 ||
-    password.length > 255
-  ) {
-    return c.json({ message: "Invalid password" }, 400);
-  }
   try {
-    const key = await auth.useKey("username", username.toLowerCase(), password);
-    const session = await auth.createSession({
-      userId: key.userId,
-      attributes: {},
+    const body = await c.req.json();
+    const schema = z.object({
+      username: z.string().min(3).max(31),
+      password: z.string().min(5).max(255),
     });
+    const { username, password } = schema.parse(body);
+    if (
+      typeof username !== "string" ||
+      username.length < 3 ||
+      username.length > 31
+    ) {
+      return c.json({ message: "Invalid username" }, 400);
+    }
+    if (
+      typeof password !== "string" ||
+      password.length < 5 ||
+      password.length > 255
+    ) {
+      return c.json({ message: "Invalid password" }, 400);
+    }
+    try {
+      const key = await auth.useKey(
+        "username",
+        username.toLowerCase(),
+        password
+      );
+      const session = await auth.createSession({
+        userId: key.userId,
+        attributes: {},
+      });
 
-    const authRequest = auth.handleRequest(c);
-    authRequest.setSession(session);
+      const authRequest = auth.handleRequest(c);
+      authRequest.setSession(session);
 
-    return c.json({ message: "Logged in successfully!" }, 200);
+      return c.json({ message: "Logged in successfully!" }, 200);
+    } catch (e) {
+      console.error(e);
+      return c.json({ message: "Incorrect username or password" }, 400);
+    }
   } catch (e) {
     console.error(e);
-    return c.json({ message: "Incorrect username or password" }, 400);
+    return c.json({ message: "Internal Server Error" }, 500);
   }
 });
 

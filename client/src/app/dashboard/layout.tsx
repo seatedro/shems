@@ -10,6 +10,7 @@ import {
 import { logout } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import { BarChartIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -93,7 +94,15 @@ export default function DashboardLayout({
                 variant="ghost"
               >
                 <Avatar>
-                  <AvatarImage src="https://github.com/rohitp934.png" />
+                  <AvatarImage asChild src="/profile.png">
+                    <Image
+                      src="/profile.png"
+                      alt="profile"
+                      width={40}
+                      height={40}
+                      className="text-white"
+                    />
+                  </AvatarImage>
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
 

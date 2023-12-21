@@ -18,14 +18,6 @@ import {
   ServiceLocation,
 } from "@/interfaces/interface";
 import { useEffect, useState } from "react";
-// import {
-//   ResponsiveContainer,
-//   LineChart as ReLineChart,
-//   XAxis,
-//   Tooltip,
-//   Line,
-//   YAxis,
-// } from "recharts";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -65,7 +57,7 @@ export default function Analytics({
   billData: BillData;
 }) {
   const [energyLocation, setEnergyLocation] = useState<number | null>(
-    locations[0].locationid
+    (locations && locations.length && locations[0].locationid) ?? null
   );
   const [dailyEnergyData, setDailyEnergyData] = useState<EnergyData[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<number | null>(null);

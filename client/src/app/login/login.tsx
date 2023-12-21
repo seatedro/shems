@@ -2,10 +2,30 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
-import { login } from "@/lib/actions";
+import { LoginFormData, login } from "@/lib/actions";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle } from "lucide-react";
 
 export default function Login() {
   const { pending } = useFormStatus();
+  const [isPending, startTransition] = useTransition();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({ mode: "onChange", delayError: 1000 });
+
+  const onSubmit = handleSubmit((data) => {
+    startTransition(() => login(data));
+  });
 
   return (
     <div
@@ -23,8 +43,8 @@ export default function Login() {
             href={`${process.env.NEXT_PUBLIC_API_URL}/login/github`}
             passHref={true}
           >
-            <Button className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 px-4 rounded">
-              <GithubIcon className="text-white" />
+            <Button className="w-full flex items-center justify-center gap-2 dark:bg-white bg-white dark:hover:bg-gray-300 hover:bg-gray-300 py-3 px-4 rounded">
+              <GithubIcon className="text-black dark:text-black hover:text-white dark:hover:text-white" />
               Continue with GitHub
             </Button>
           </Link>
@@ -34,30 +54,69 @@ export default function Login() {
           <p className="text-gray-400 px-3">or</p>
           <hr className="w-full bg-gray-700" />
         </div>
-        <form className="space-y-6" action={login}>
-          <div className="flex flex-col">
+        <form className="space-y-6" onSubmit={onSubmit}>
+          <div className="flex">
             <input
               className="w-full bg-gray-700 text-white py-3 px-4 rounded"
               id="username"
-              name="username"
               placeholder="Username"
               type="text"
+              {...register("username", {
+                required: true,
+                minLength: 3,
+                maxLength: 31,
+              })}
             />
+            {errors.username && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="destructive" className="ml-2 h-8">
+                      <AlertCircle className="w-3 h-3" />
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Username must be between 3 and 31 characters long
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
-          <div className="flex flex-col">
+          <div className="flex">
             <input
               className="w-full bg-gray-700 text-white py-3 px-4 rounded"
               id="password"
-              name="password"
               placeholder="Password"
               type="password"
+              {...register("password", {
+                required: true,
+                minLength: 5,
+                maxLength: 24,
+                pattern:
+                  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+              })}
             />
-            <Link
+            {errors.password && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="destructive" className="ml-2 h-8">
+                      <AlertCircle className="w-3 h-3" />
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Password must be between 5 and 24 characters long and
+                    contain at least one number and one special character
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            {/* <Link
               className="text-sm text-gray-400 hover:text-gray-300 mt-2"
               href="#"
             >
               Forgot Password?
-            </Link>
+            </Link> */}
           </div>
           <Button
             className="w-full bg-black py-3 px-4 rounded text-white"
