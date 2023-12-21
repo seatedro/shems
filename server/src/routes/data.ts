@@ -318,4 +318,55 @@ app.get(
   }
 );
 
+app.get(
+  "/bill",
+  zValidator("query", z.object({ customerId: z.string() })),
+  async (c) => {
+    const { customerId } = c.req.valid("query");
+    const customerid = z.coerce.number().parse(customerId);
+
+    const bill = await sql`
+    SELECT
+        sl.LocationID,
+        sl.Address,
+        DATE_TRUNC('month', dd.Timestamp) AS Month,
+        CAST(SUM(CAST(dd.Value AS DECIMAL) * ep.PricePerKWh) AS FLOAT) AS Cost
+    FROM 
+        DeviceData dd
+    JOIN 
+        Devices d ON dd.DeviceID = d.DeviceID
+    JOIN 
+        ServiceLocations sl ON d.LocationID = sl.LocationID
+    JOIN 
+        Customers c ON sl.CustomerID = c.CustomerID
+    JOIN 
+        EnergyPrices ep ON sl.ZipCode = ep.ZipCode 
+        AND DATE_TRUNC('hour', dd.Timestamp) = DATE_TRUNC('hour', ep.Time)
+    WHERE 
+        c.CustomerID = ${customerId}
+        AND dd.EventType = 'energy use'
+        AND EXTRACT(MONTH FROM dd.Timestamp) = EXTRACT(MONTH FROM NOW())
+    GROUP BY 
+        sl.LocationID, sl.Address, Month
+    ORDER BY 
+        sl.LocationID, Month;
+    `;
+    if (bill.length === 0) {
+      return c.json({
+        bill: [],
+        total: 0,
+      });
+    }
+
+    const total = bill.reduce((acc, curr) => {
+      return acc + curr.cost;
+    }, 0);
+
+    return c.json({
+      bill,
+      total,
+    });
+  }
+);
+
 export default app;

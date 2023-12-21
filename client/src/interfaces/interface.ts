@@ -83,3 +83,13 @@ export type DeviceWiseEnergyData = {
   consumption: number;
   start: string;
 };
+
+export type BillData = {
+  bill: {
+    locationid: number;
+    address: number;
+    month: string;
+    cost: number;
+  }[];
+  total: number;
+};

@@ -20,6 +20,7 @@ import {
   Device,
   OverallEnergyData,
   DeviceWiseEnergyData,
+  BillData,
 } from "@/interfaces/interface";
 import {
   LineDataMock,
@@ -44,9 +45,12 @@ import {
 // } from "recharts";
 import {
   BadgeDelta,
+  BarList,
+  DonutChart,
   Flex,
   Metric,
   Text,
+  Title,
   Card as TremorCard,
   LineChart as TremorLineChart,
 } from "@tremor/react";
@@ -64,6 +68,7 @@ export default function Analytics({
   maxPercentageIncrease,
   overallEnergyData,
   deviceWiseEnergyData,
+  billData,
 }: {
   user: { username: string; customerId: number };
   energyData: EnergyData[];
@@ -73,6 +78,7 @@ export default function Analytics({
   maxPercentageIncrease: MaxPercentIncrease;
   overallEnergyData: Record<string, OverallEnergyData[]>;
   deviceWiseEnergyData: Record<string, DeviceWiseEnergyData[]>;
+  billData: BillData;
 }) {
   const [energyLocation, setEnergyLocation] = useState<number | null>(
     locations[0].locationid
@@ -160,18 +166,30 @@ export default function Analytics({
             </Card>
             <Card className="w-full bg-slate-800 dark:bg-slate-800">
               <CardHeader>
-                <CardTitle>Energy Consumption Increase</CardTitle>
+                <CardTitle>Stats</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col justify-center">
-                <div className="flex flex-col justify-center items-center gap-3">
-                  {maxPercentageIncrease.address}
-                  <div className="text-5xl font-bold text-red-500">
-                    +{maxPercentageIncrease.increase} KwH
+                <Title>Overall Bill</Title>
+                <Flex>
+                  <div>
+                    <Metric>${billData.total}</Metric>
                   </div>
-                  <p className="text-lg text-muted-foreground">
-                    +{maxPercentageIncrease.maxPercentIncrease}% from last month
-                  </p>
-                </div>
+                </Flex>
+                <Title className="mt-4">Energy Consumption Increase</Title>
+                <Flex>
+                  <div className="">
+                    <Text>{maxPercentageIncrease.address}</Text>
+                    <Metric>+{maxPercentageIncrease.increase} KwH</Metric>
+                  </div>
+                  <BadgeDelta
+                    deltaType={getDeltaType(
+                      maxPercentageIncrease.maxPercentIncrease
+                    )}
+                    isIncreasePositive={false}
+                  >
+                    +{maxPercentageIncrease.maxPercentIncrease}%
+                  </BadgeDelta>
+                </Flex>
               </CardContent>
             </Card>
             <Card className="w-full bg-slate-800 dark:bg-slate-800">
@@ -238,7 +256,7 @@ export default function Analytics({
           </Card>
         </TabsContent>
         <TabsContent value="detail" className="mt-8">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-4 mt-8">
             <Card className="dark:bg-slate-800">
               <CardHeader>
                 <CardTitle>Graph Type</CardTitle>
@@ -318,6 +336,39 @@ export default function Analytics({
                   period={timePeriod}
                 />
               )}
+            </CardContent>
+          </Card>
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Electricity Bill by Location</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-8">
+                <div className="w-1/2">
+                  <DonutChart
+                    className="mt-4"
+                    data={billData.bill}
+                    category="cost"
+                    valueFormatter={(v) => `$${v}`}
+                    index="address"
+                  />
+                </div>
+                <div className="w-1/2">
+                  <BarList
+                    data={
+                      billData.bill
+                        .toSorted((a, b) => b.cost - a.cost)
+                        .map((l) => {
+                          return {
+                            name: l.address,
+                            value: l.cost,
+                            key: l.locationid,
+                          };
+                        }) as any
+                    }
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -1,5 +1,6 @@
 "use server";
 import {
+  BillData,
   Device,
   DeviceWiseEnergyData,
   EnergyComparison,
@@ -161,4 +162,17 @@ export async function getDeviceWiseEnergyData(
   const res: { deviceWiseEnergyData: Record<string, DeviceWiseEnergyData[]> } =
     await deviceWiseEnergyReq.json();
   return res.deviceWiseEnergyData;
+}
+
+export async function getBillData(customerId: number) {
+  const billReq = await fetch(
+    `${process.env.API_URL}/devicedata/bill?customerId=${customerId}`,
+    {
+      next: {
+        tags: [`getBillData-${customerId}`],
+      },
+    }
+  );
+  const res: BillData = await billReq.json();
+  return res;
 }

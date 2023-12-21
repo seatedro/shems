@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Analytics from "./analytics";
 import { EnergyComparison, EnergyData } from "@/interfaces/interface";
 import {
+  getBillData,
   getDeviceWiseEnergyData,
   getDevices,
   getEnergyComparisonData,
@@ -43,6 +44,8 @@ export default async function Page() {
     devices.map((device) => device.deviceid)
   );
 
+  const monthlyBill = await getBillData(user.customerId);
+
   return (
     <>
       <Analytics
@@ -58,6 +61,7 @@ export default async function Page() {
           deviceWiseEnergyConsumption ? deviceWiseEnergyConsumption : {}
         }
         maxPercentageIncrease={maxPercentageIncrease}
+        billData={monthlyBill}
       />
     </>
   );
