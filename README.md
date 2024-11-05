@@ -18,7 +18,7 @@ The frontend of this project is located in the `client/` directory. It is writte
 
 To get started with this project, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/rohitp934/shems.git`
+1. Clone the repository: `git clone https://github.com/seatedro/shems.git`
 2. Install dependencies for the backend: `cd server/ && bun install`
 3. Install dependencies for the frontend: `cd client/ && bun install`
 4. Start the backend server: `cd server/ && bun run --hot src/index.ts`
